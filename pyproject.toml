@@ -1,0 +1,31 @@
+[project]
+name = "expert-finder"
+version = "0.1.0"
+description = "POC for identifying subject-matter experts from a professional community."
+requires-python = ">=3.11"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Your Team" }]
+
+# Core runtime deps
+dependencies = [
+  "infisicalsdk==1.0.8",
+  "notebook>=7.5.3",
+  "openai>=1.0.0",
+  "pandas>=3.0.0",
+  "pydantic>=2.6",
+  "python-dotenv==1.1.0",
+]
+
+[project.optional-dependencies]
+# Dev/test deps
+dev = [
+  "pytest>=7.4",
+]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+pythonpath = ["."]
+
+[tool.uv]
+# uv will manage virtual envs and locking for this project
