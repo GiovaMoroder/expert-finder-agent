@@ -12,9 +12,8 @@ class Settings:
     In production, these would be loaded from env vars or a config file.
     """
 
-    llm_mode: str = "stub"  # "stub" or "gpt"
+    # TODO: flag here if we want to use different LLMs
     gpt_model: str = "gpt-4o-mini"
-    gpt_api_key: str = ""  # TODO: load from env in production
 
 
 SETTINGS = Settings()

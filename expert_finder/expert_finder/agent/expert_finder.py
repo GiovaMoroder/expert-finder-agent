@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import pprint
 from typing import TypeAlias
 
 from expert_finder.expert_finder.llm.ports import LLMPort
@@ -33,6 +34,7 @@ class ExpertFinderAgent:
         logger.info("Starting expert finder run.")
         logger.debug("Question: %s", question)
 
+        # Retrieve candidates based on their education
         edu_results = self.use_search_tool(self.education_search, question)
         logger.debug(
             "Education tool returned %d candidates (first up to 5): %s",
@@ -40,6 +42,7 @@ class ExpertFinderAgent:
             edu_results[:5],
         )
 
+        # Retrieve candidates based on their professional experience
         professional_results = self.use_search_tool(self.professional_search, question)
         logger.debug(
             "Work experience tool returned %d candidates (first up to 5): %s",
@@ -50,11 +53,13 @@ class ExpertFinderAgent:
         candidate_names = set(edu_results) | set(professional_results)
         logger.info("Tool searches returned %s candidates.", len(candidate_names))
 
-        candidates = sorted(candidate_names)[:7]
-        if not candidates:
+        if not candidate_names:
             return FinalResult(experts=[])
 
-        profiles = self.profile_compare.build_profiles(candidates)
+        # Compare candidates based on their profiles
+        profiles = self.profile_compare.build_profiles(candidate_names)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("Profiles payload:\n%s", pprint.pformat(profiles, width=100))
         result = self.profile_compare.compare_profiles(
             question,
             profiles,
