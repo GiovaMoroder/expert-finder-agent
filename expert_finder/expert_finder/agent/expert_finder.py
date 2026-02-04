@@ -30,6 +30,10 @@ class ExpertFinderAgent:
         self.profile_compare = profile_compare
 
     def run(self, question: str) -> FinalResult:
+        result, _ = self.run_with_metrics(question)
+        return result
+
+    def run_with_metrics(self, question: str) -> tuple[FinalResult, dict[str, int]]:
         logger = logging.getLogger(self.__class__.__name__)
         logger.info("Starting expert finder run.")
         logger.debug("Question: %s", question)
@@ -54,7 +58,12 @@ class ExpertFinderAgent:
         logger.info("Tool searches returned %s candidates.", len(candidate_names))
 
         if not candidate_names:
-            return FinalResult(experts=[])
+            return FinalResult(experts=[]), {
+                "education_candidates": len(edu_results),
+                "professional_candidates": len(professional_results),
+                "total_candidates": 0,
+                "profiles_compared": 0,
+            }
 
         # Compare candidates based on their profiles
         profiles = self.profile_compare.build_profiles(candidate_names)
@@ -73,7 +82,12 @@ class ExpertFinderAgent:
             )
         result = result.model_copy(update={"experts": enriched_experts})
         logger.info("Expert finder run completed with %s experts.", len(result.experts))
-        return result
+        return result, {
+            "education_candidates": len(edu_results),
+            "professional_candidates": len(professional_results),
+            "total_candidates": len(candidate_names),
+            "profiles_compared": len(profiles),
+        }
 
     def use_search_tool(self, tool: SupportedTool, question: str) -> list[str]:
         tool_args = tool.build_tool_args(question, self.llm)

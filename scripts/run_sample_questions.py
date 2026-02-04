@@ -29,13 +29,14 @@ def main() -> None:
     for i, item in enumerate(questions):
         question = item.get("text", "")
         start_time = time.perf_counter()
-        result = agent.run(question)
+        result, metrics = agent.run_with_metrics(question)
         elapsed = time.perf_counter() - start_time
         results.append(
             {
                 "id": item.get("id"),
                 "question": question,
                 "result": result.model_dump(),
+                "candidate_metrics": metrics,
                 "elapsed_seconds": round(elapsed, 3),
             }
         )
