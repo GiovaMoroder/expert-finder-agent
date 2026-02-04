@@ -9,3 +9,6 @@ data/.gitkeep
 data/mentees.json
 data/sample_requests.json
 data/sample_requests_results.json
+data/raw/*
+data/processed/*
+
