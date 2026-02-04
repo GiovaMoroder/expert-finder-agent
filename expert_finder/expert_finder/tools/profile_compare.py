@@ -66,7 +66,7 @@ def main() -> None:
         education_search=EducationSearchTool(),
         professional_search=WorkExperienceSearchTool(),
     )
-    profiles = tool.build_profiles(["Eleonora Ricchi"])
+    profiles = tool.build_profiles(["Matteo Oldani"])
     print(json.dumps(profiles, indent=2))
 
 
