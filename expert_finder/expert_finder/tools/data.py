@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date
-
-from expert_finder.expert_finder.types.schemas import Candidate, CV, InstitutionRecord
+from expert_finder.expert_finder.types.schemas import Candidate, CV
 
 
 CANDIDATES = [
@@ -12,108 +10,108 @@ CANDIDATES = [
         name="Avery Chen",
         current_title="Principal ML Engineer",
         institution_records=[
-            InstitutionRecord(
-                institution="OpenAI",
-                role="Research Engineer",
-                start_date=date(2019, 1, 1),
-                end_date=date(2022, 6, 1),
-            )
+            {
+                "institution": "OpenAI",
+                "role": "Research Engineer",
+                "start_date": "2019-01-01",
+                "end_date": "2022-06-01",
+            }
         ],
     ),
     Candidate(
         name="Diego Morales",
         current_title="Data Science Lead",
         institution_records=[
-            InstitutionRecord(
-                institution="Google",
-                role="Senior Data Scientist",
-                start_date=date(2017, 5, 1),
-                end_date=date(2021, 12, 1),
-            )
+            {
+                "institution": "Google",
+                "role": "Senior Data Scientist",
+                "start_date": "2017-05-01",
+                "end_date": "2021-12-01",
+            }
         ],
     ),
     Candidate(
         name="Priya Patel",
         current_title="AI Product Manager",
         institution_records=[
-            InstitutionRecord(
-                institution="OpenAI",
-                role="Product Manager",
-                start_date=date(2020, 3, 1),
-                end_date=date(2023, 8, 1),
-            )
+            {
+                "institution": "OpenAI",
+                "role": "Product Manager",
+                "start_date": "2020-03-01",
+                "end_date": "2023-08-01",
+            }
         ],
     ),
     Candidate(
         name="Samir Khan",
         current_title="Applied Scientist",
         institution_records=[
-            InstitutionRecord(
-                institution="Amazon",
-                role="Applied Scientist",
-                start_date=date(2018, 2, 1),
-                end_date=date(2022, 2, 1),
-            ),
-            InstitutionRecord(
-                institution="OpenAI",
-                role="Research Scientist",
-                start_date=date(2022, 3, 1),
-                end_date=None,
-            ),
+            {
+                "institution": "Amazon",
+                "role": "Applied Scientist",
+                "start_date": "2018-02-01",
+                "end_date": "2022-02-01",
+            },
+            {
+                "institution": "OpenAI",
+                "role": "Research Scientist",
+                "start_date": "2022-03-01",
+                "end_date": None,
+            },
         ],
     ),
     Candidate(
         name="Maya Rodriguez",
         current_title="ML Researcher",
         institution_records=[
-            InstitutionRecord(
-                institution="Stanford University",
-                role="PhD Researcher",
-                start_date=date(2016, 9, 1),
-                end_date=date(2021, 6, 1),
-            )
+            {
+                "institution": "Stanford University",
+                "role": "PhD Researcher",
+                "start_date": "2016-09-01",
+                "end_date": "2021-06-01",
+            }
         ],
     ),
     Candidate(
         name="Elena Fischer",
         current_title="Senior NLP Engineer",
         institution_records=[
-            InstitutionRecord(
-                institution="OpenAI",
-                role="NLP Engineer",
-                start_date=date(2018, 4, 1),
-                end_date=date(2021, 9, 1),
-            ),
-            InstitutionRecord(
-                institution="Meta",
-                role="Senior NLP Engineer",
-                start_date=date(2021, 10, 1),
-                end_date=None,
-            ),
+            {
+                "institution": "OpenAI",
+                "role": "NLP Engineer",
+                "start_date": "2018-04-01",
+                "end_date": "2021-09-01",
+            },
+            {
+                "institution": "Meta",
+                "role": "Senior NLP Engineer",
+                "start_date": "2021-10-01",
+                "end_date": None,
+            },
         ],
     ),
     Candidate(
         name="Jordan Lee",
         current_title="Security Engineer",
         institution_records=[
-            InstitutionRecord(
-                institution="OpenAI",
-                role="Security Engineer",
-                start_date=date(2019, 7, 1),
-                end_date=date(2022, 11, 1),
-            )
+            {
+                "institution": "OpenAI",
+                "role": "Security Engineer",
+                "start_date": "2019-07-01",
+                "end_date": "2022-11-01",
+            }
         ],
     ),
     Candidate(
         name="Nadia Ivanova",
         current_title="Research Scientist",
         institution_records=[
-            InstitutionRecord(
-                institution="OpenAI",
-                role="Research Scientist",
-                start_date=date(2017, 2, 1),
-                end_date=date(2020, 12, 1),
-            )
+            {
+                "institution": "OpenAI",
+                "role": "Research Scientist",
+                "start_date": "2017-02-01",
+                "end_date": "2020-12-01",
+            }
         ],
     ),
 ]

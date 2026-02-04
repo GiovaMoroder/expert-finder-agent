@@ -6,7 +6,7 @@ import json
 import re
 from typing import Any
 
-from .port import LLMPort
+from ..ports import LLMPort
 
 
 class DeterministicStubLLM(LLMPort):

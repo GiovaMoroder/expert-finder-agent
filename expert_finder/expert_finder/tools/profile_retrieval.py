@@ -3,13 +3,11 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
 
 from expert_finder.expert_finder.tools.data import CVS
 from expert_finder.expert_finder.types.schemas import CV
 
 
-@dataclass(frozen=True)
 class ProfileRetrievalTool:
     """Retrieve a candidate CV by ID.
 

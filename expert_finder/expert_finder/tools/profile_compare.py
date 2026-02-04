@@ -4,18 +4,17 @@ from __future__ import annotations
 
 import json
 import logging
-from dataclasses import dataclass
 
-from expert_finder.expert_finder.llm.port import LLMPort
+from expert_finder.expert_finder.llm.ports import LLMPort
 from expert_finder.expert_finder.tools.education_search import EducationSearchTool
-from expert_finder.expert_finder.tools.institution_search import ProfessionalSearchTool
+from expert_finder.expert_finder.tools.work_experience_search import WorkExperienceSearchTool
 from expert_finder.expert_finder.types.schemas import FinalResult
 
 
-@dataclass(frozen=True)
 class ProfileComparisonTool:
-    education_search: EducationSearchTool
-    professional_search: ProfessionalSearchTool
+    def __init__(self, education_search: EducationSearchTool, professional_search: WorkExperienceSearchTool) -> None:
+        self.education_search = education_search
+        self.professional_search = professional_search
 
     def build_profiles(self, names: list[str]) -> list[dict]:
         education_records = self.education_search.get_records(names)

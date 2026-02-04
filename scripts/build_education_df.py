@@ -3,10 +3,10 @@ from pathlib import Path
 
 import pandas as pd
 
-from expert_finder.expert_finder.path import EDUCATION_CSV, MENTEES_JSON
+from expert_finder.expert_finder.path import MENTEES_JSON, RAW_EDUCATION_CSV
 
 input_path = MENTEES_JSON
-output_path = EDUCATION_CSV
+output_path = RAW_EDUCATION_CSV
 
 def main() -> None:
     data_path = Path(input_path)

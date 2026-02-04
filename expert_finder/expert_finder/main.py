@@ -8,17 +8,17 @@ import os
 
 from expert_finder.expert_finder.agent.expert_finder import ExpertFinderAgent
 from expert_finder.expert_finder.config import SETTINGS
-from expert_finder.expert_finder.llm.gpt import GPTLLM
-from expert_finder.expert_finder.llm.stub import DeterministicStubLLM
+from expert_finder.expert_finder.llm.adapters.gpt import GPTLLM
+from expert_finder.expert_finder.llm.adapters.stub import DeterministicStubLLM
 from expert_finder.expert_finder.logging import setup_logging
 from expert_finder.expert_finder.tools.education_search import EducationSearchTool
-from expert_finder.expert_finder.tools.institution_search import ProfessionalSearchTool
+from expert_finder.expert_finder.tools.work_experience_search import WorkExperienceSearchTool
 from expert_finder.expert_finder.tools.profile_compare import ProfileComparisonTool
 
 
 def build_agent() -> ExpertFinderAgent:
     education_search = EducationSearchTool()
-    professional_search = ProfessionalSearchTool()
+    professional_search = WorkExperienceSearchTool()
     return ExpertFinderAgent(
         llm=GPTLLM(model=SETTINGS.gpt_model),
         education_search=education_search,

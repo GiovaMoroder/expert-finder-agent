@@ -4,21 +4,26 @@ from __future__ import annotations
 
 import json
 import logging
-from dataclasses import dataclass
 
-from expert_finder.expert_finder.llm.port import LLMPort
+from expert_finder.expert_finder.llm.ports import LLMPort
 from expert_finder.expert_finder.tools.education_search import EducationSearchTool
-from expert_finder.expert_finder.tools.institution_search import ProfessionalSearchTool
+from expert_finder.expert_finder.tools.work_experience_search import WorkExperienceSearchTool
 from expert_finder.expert_finder.tools.profile_compare import ProfileComparisonTool
 from expert_finder.expert_finder.types.schemas import FinalResult
 
 
-@dataclass(frozen=True)
 class ExpertFinderAgent:
-    llm: LLMPort
-    education_search: EducationSearchTool
-    professional_search: ProfessionalSearchTool
-    profile_compare: ProfileComparisonTool
+    def __init__(
+        self,
+        llm: LLMPort,
+        education_search: EducationSearchTool,
+        professional_search: WorkExperienceSearchTool,
+        profile_compare: ProfileComparisonTool,
+    ) -> None:
+        self.llm = llm
+        self.education_search = education_search
+        self.professional_search = professional_search
+        self.profile_compare = profile_compare
 
     def run(self, question: str) -> FinalResult:
         logger = logging.getLogger(self.__class__.__name__)
