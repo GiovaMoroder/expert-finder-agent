@@ -13,5 +13,7 @@ RAW_WORK_EXPERIENCES_CSV = DATA_DIR / "raw" / "work_experiences.csv"
 PROCESSED_WORK_EXPERIENCES_CSV = DATA_DIR / "processed" / "work_experiences.csv"
 WORK_EXPERIENCES_CSV = PROCESSED_WORK_EXPERIENCES_CSV
 PROFESSIONAL_CSV = WORK_EXPERIENCES_CSV
+SAMPLE_REQUESTS_JSON = DATA_DIR / "sample_requests.json"
+SAMPLE_REQUESTS_RESULTS_JSON = DATA_DIR / "sample_requests_results.json"
 MENTEES_JSON = DATA_DIR / "mentees.json"
 INSTITUTIONS_JSON = DATA_DIR / "institutions.json"

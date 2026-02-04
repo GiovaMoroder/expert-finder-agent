@@ -65,6 +65,13 @@ class ExpertFinderAgent:
             profiles,
             self.llm,
         )
+        profile_by_name = {profile["name"]: profile for profile in profiles}
+        enriched_experts = []
+        for expert in result.experts:
+            enriched_experts.append(
+                expert.model_copy(update={"profile": profile_by_name.get(expert.name)})
+            )
+        result = result.model_copy(update={"experts": enriched_experts})
         logger.info("Expert finder run completed with %s experts.", len(result.experts))
         return result
 

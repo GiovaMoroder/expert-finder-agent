@@ -23,6 +23,7 @@ class QueryExtraction(BaseModel):
 class FinalExpert(BaseModel):
     name: str
     reason: str
+    profile: Optional[dict] = None
 
 
 class FinalResult(BaseModel):
