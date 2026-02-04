@@ -22,5 +22,5 @@ class EducationRecord:
     degree: Optional[str]
     field_of_study: Optional[str]
     start_date: Optional[str]
-    graduation_date: Optional[str]
+    end_date: Optional[str]
     gpa: Optional[str]
