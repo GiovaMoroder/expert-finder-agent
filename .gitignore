@@ -5,3 +5,7 @@ __pycache__/
 .env.*
 .DS_Store
 .idea/
+data/.gitkeep
+data/mentees.json
+data/sample_requests.json
+data/sample_requests_results.json
