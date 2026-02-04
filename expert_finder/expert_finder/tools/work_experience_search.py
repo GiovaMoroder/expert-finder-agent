@@ -17,8 +17,8 @@ class WorkExperienceSearchTool:
     def search(self, query: str, top_k: int = 10) -> list[str]:
         return self.work_repo.search(query, top_k=top_k)
 
-    def extract_query(self, question: str, llm: LLMPort) -> QueryExtraction:
-        """Extract query parameters from the question for professional search."""
+    def build_tool_args(self, question: str, llm: LLMPort) -> QueryExtraction:
+        """Build tool arguments from the question for professional search."""
 
         system_prompt = (
             """

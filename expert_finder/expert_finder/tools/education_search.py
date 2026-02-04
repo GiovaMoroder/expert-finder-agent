@@ -17,8 +17,8 @@ class EducationSearchTool:
     def search(self, query: str, top_k: int = 10, min_score: float = 0.0) -> list[str]:
         return self.education_repo.search(query, top_k=top_k, min_score=min_score)
 
-    def extract_query(self, question: str, llm: LLMPort) -> QueryExthitraction:
-        """Extract query parameters from the question for education search."""
+    def build_tool_args(self, question: str, llm: LLMPort) -> QueryExtraction:
+        """Build tool arguments from the question for education search."""
 
         system_prompt = (
             """

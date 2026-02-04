@@ -34,6 +34,7 @@ def main() -> None:
             "raw": df.apply(_row_to_raw_json, axis=1),
         }
     )
+    processed = processed[processed["institution"].notna()]
 
     processed.to_csv(output_path, index=False)
     print("successfully built processed education dataframe with shape:", processed.shape)

@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import json
 import logging
+from typing import TypeAlias
 
 from expert_finder.expert_finder.llm.ports import LLMPort
 from expert_finder.expert_finder.tools.education_search import EducationSearchTool
 from expert_finder.expert_finder.tools.work_experience_search import WorkExperienceSearchTool
 from expert_finder.expert_finder.tools.profile_compare import ProfileComparisonTool
 from expert_finder.expert_finder.types.schemas import FinalResult
+
+SupportedTool: TypeAlias = EducationSearchTool | WorkExperienceSearchTool
 
 
 class ExpertFinderAgent:
@@ -30,40 +33,44 @@ class ExpertFinderAgent:
         logger.info("Starting expert finder run.")
         logger.debug("Question: %s", question)
 
-        education_extraction = self.education_search.extract_query(question, self.llm)
-        professional_extraction = self.professional_search.extract_query(question, self.llm)
-        logger.info(
-            "Extraction result (education): %s", education_extraction.model_dump(mode="json")
-        )
-        logger.info(
-            "Extraction result (professional): %s",
-            professional_extraction.model_dump(mode="json"),
+        edu_results = self.use_search_tool(self.education_search, question)
+        logger.debug(
+            "Education tool returned %d candidates (first up to 5): %s",
+            len(edu_results),
+            edu_results[:5],
         )
 
-        candidate_names: set[str] = set()
-        if education_extraction.tool_required and education_extraction.institution:
-            candidate_names.update(
-                self.education_search.search(education_extraction.institution)
-            )
-        if professional_extraction.tool_required and professional_extraction.institution:
-            candidate_names.update(
-                self.professional_search.search(professional_extraction.institution)
-            )
+        professional_results = self.use_search_tool(self.professional_search, question)
+        logger.debug(
+            "Work experience tool returned %d candidates (first up to 5): %s",
+            len(professional_results),
+            professional_results[:5],
+        )
+
+        candidate_names = set(edu_results) | set(professional_results)
+        logger.info("Tool searches returned %s candidates.", len(candidate_names))
 
         candidates = sorted(candidate_names)[:7]
-        logger.info("Tool searches returned %s candidates.", len(candidates))
         if not candidates:
             return FinalResult(experts=[])
 
         profiles = self.profile_compare.build_profiles(candidates)
         result = self.profile_compare.compare_profiles(
             question,
-            {
-                "education": education_extraction.model_dump(mode="json"),
-                "professional": professional_extraction.model_dump(mode="json"),
-            },
             profiles,
             self.llm,
         )
         logger.info("Expert finder run completed with %s experts.", len(result.experts))
         return result
+
+    def use_search_tool(self, tool: SupportedTool, question: str) -> list[str]:
+        tool_args = tool.build_tool_args(question, self.llm)
+        logger = logging.getLogger(self.__class__.__name__)
+        logger.debug(
+            "Tool %s built args: %s",
+            tool.__class__.__name__,
+            tool_args.model_dump(mode="json"),
+        )
+        if tool_args.tool_required and tool_args.institution:
+            return tool.search(tool_args.institution)
+        return []

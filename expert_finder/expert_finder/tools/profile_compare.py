@@ -30,7 +30,7 @@ class ProfileComparisonTool:
             profiles.append({"name": name, "experiences": experiences})
         return profiles
 
-    def compare_profiles(self, question: str, extraction: dict, profiles: list[dict], llm: LLMPort) -> FinalResult:
+    def compare_profiles(self, question: str, profiles: list[dict], llm: LLMPort) -> FinalResult:
         logger = logging.getLogger(self.__class__.__name__)
         system_prompt = (
             "You are an expert comparator. "
@@ -41,7 +41,6 @@ class ProfileComparisonTool:
         )
         payload = {
             "question": question,
-            "extraction": extraction,
             "profiles": profiles,
         }
         user_prompt = f"PAYLOAD:\n{json.dumps(payload)}"
