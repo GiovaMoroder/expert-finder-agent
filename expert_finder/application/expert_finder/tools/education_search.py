@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from expert_finder.domain.education_normalization import normalize_school
 from expert_finder.domain.ports import EducationRepository
 from expert_finder.domain.ports import LLMPort
 from expert_finder.domain.models import QueryExtraction
@@ -14,7 +15,10 @@ class EducationSearchTool:
         self.education_repo = education_repo
 
     def search(self, query: str, top_k: int = 10, min_score: float = 0.0) -> list[str]:
-        return self.education_repo.search(query, top_k=top_k, min_score=min_score)
+        normalized_query = normalize_school(query)
+        if normalized_query is None:
+            return []
+        return self.education_repo.search(normalized_query, top_k=top_k, min_score=min_score)
 
     def build_tool_args(self, question: str, llm: LLMPort) -> QueryExtraction:
         """Build tool arguments from the question for education search."""

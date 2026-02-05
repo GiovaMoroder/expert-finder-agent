@@ -10,7 +10,7 @@ from expert_finder.application.expert_finder.use_case import ExpertFinderAgent
 from expert_finder.infrastructure.config import SETTINGS
 from expert_finder.infrastructure.llm.adapters.gpt import GPTLLM
 from expert_finder.infrastructure.llm.adapters.stub import DeterministicStubLLM
-from expert_finder.infrastructure.logging import setup_logging
+from expert_finder.infrastructure.logging import setup_logging, silence_third_party_loggers
 from expert_finder.application.expert_finder.tools.education_search import EducationSearchTool
 from expert_finder.application.expert_finder.tools.work_experience_search import WorkExperienceSearchTool
 from expert_finder.application.expert_finder.tools.profile_compare import ProfileComparisonTool
@@ -48,12 +48,16 @@ def main() -> None:
     args = parser.parse_args()
 
     setup_logging(args.log_level)
-    # setup_logging('DEBUG')
-
     agent = build_agent()
+    # Re-silence OpenAI/HTTP loggers in case the SDK set DEBUG on import
+    silence_third_party_loggers()
     result = agent.run(args.question)
-    print(json.dumps({"question": args.question, "result": result.model_dump()}, indent=2))
 
+    formatted_results = [{'name': e.name, 'reason': e.reason} for e in result.experts]
+    print(json.dumps({"question": args.question, "result": formatted_results}, indent=2))
+
+
+    # print(json.dumps({"question": args.question, "result": result.model_dump()}, indent=2))
 
 if __name__ == "__main__":
     main()

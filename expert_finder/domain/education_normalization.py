@@ -10,7 +10,11 @@ from typing import Dict, List, Optional
 def _clean(s: str) -> str:
     s = s.strip()
     s = s.replace("’", "'").replace("–", "-").replace("—", "-")
+    # Explicitly convert à to a (before lowercasing to catch À as well)
+    s = s.replace("à", "a").replace("À", "a")
     s = s.lower()
+    # Remove "degli studi" (case insensitive, already lowercased)
+    s = re.sub(r"\bdegli studi\b", "", s, flags=re.IGNORECASE)
     s = unicodedata.normalize("NFKD", s)
     s = "".join(ch for ch in s if not unicodedata.combining(ch))
     # keep letters/numbers and a few separators
@@ -271,18 +275,16 @@ def normalize_school(name: Optional[str]) -> Optional[str]:
 
     # Direct alias hit
     if s in _ALIAS_TO_CANONICAL:
-        return _ALIAS_TO_CANONICAL[s]
+        # Return canonical name in lowercase for search consistency
+        return _ALIAS_TO_CANONICAL[s].lower()
 
     # Heuristic collapses for common patterns not explicitly listed:
     # 1) If it's "X School of Management" and we know parent, map to parent
     if "school of management" in s or "business school" in s:
         for alias_clean, canonical in _ALIAS_TO_CANONICAL.items():
             if alias_clean in s:
-                return canonical
+                # Return canonical name in lowercase for search consistency
+                return canonical.lower()
 
-    # Fallback: re-titlecase a cleaned-ish version of the original
-    pretty = " ".join(
-        w.capitalize() if w not in {"of", "and", "the", "di", "degli", "della", "del"} else w
-        for w in s.split()
-    )
-    return pretty
+    # Fallback: return cleaned lowercase string (already lowercase from _clean)
+    return s
