@@ -5,10 +5,10 @@ from __future__ import annotations
 import json
 import logging
 
-from expert_finder.expert_finder.llm.ports import LLMPort
-from expert_finder.expert_finder.tools.education_search import EducationSearchTool
-from expert_finder.expert_finder.tools.work_experience_search import WorkExperienceSearchTool
-from expert_finder.expert_finder.types.schemas import FinalResult
+from expert_finder.domain.ports import LLMPort
+from expert_finder.application.expert_finder.tools.education_search import EducationSearchTool
+from expert_finder.application.expert_finder.tools.work_experience_search import WorkExperienceSearchTool
+from expert_finder.domain.models import FinalResult
 
 
 class ProfileComparisonTool:

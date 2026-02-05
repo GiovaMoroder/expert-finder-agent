@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from expert_finder.expert_finder.path import PROCESSED_WORK_EXPERIENCES_CSV, RAW_WORK_EXPERIENCES_CSV
+from expert_finder.infrastructure.path import PROCESSED_WORK_EXPERIENCES_CSV, RAW_WORK_EXPERIENCES_CSV
 
 
 RAW_COLUMNS = [

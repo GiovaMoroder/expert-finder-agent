@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from expert_finder.expert_finder.path import MENTEES_JSON, RAW_WORK_EXPERIENCES_CSV
-from expert_finder.expert_finder.utils.dates import linkedin_date_to_iso
+from expert_finder.infrastructure.path import MENTEES_JSON, RAW_WORK_EXPERIENCES_CSV
+from expert_finder.domain.shared.dates import linkedin_date_to_iso
 
 input_path = MENTEES_JSON
 output_path = RAW_WORK_EXPERIENCES_CSV

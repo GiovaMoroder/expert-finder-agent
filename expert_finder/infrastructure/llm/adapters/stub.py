@@ -6,7 +6,7 @@ import json
 import re
 from typing import Any
 
-from ..ports import LLMPort
+from expert_finder.domain.ports import LLMPort
 
 
 class DeterministicStubLLM(LLMPort):

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from expert_finder.expert_finder.types.schemas import Candidate, CV
+from expert_finder.domain.models import Candidate, CV
 
 
 CANDIDATES = [

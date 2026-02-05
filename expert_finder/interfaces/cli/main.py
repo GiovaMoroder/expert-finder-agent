@@ -1,10 +1,16 @@
+"""CLI entrypoint for the Expert Finder POC."""
+
+from __future__ import annotations
+
+import argparse
 import json
-import time
+import os
 
 from expert_finder.application.expert_finder.use_case import ExpertFinderAgent
 from expert_finder.infrastructure.config import SETTINGS
 from expert_finder.infrastructure.llm.adapters.gpt import GPTLLM
-from expert_finder.infrastructure.path import SAMPLE_REQUESTS_JSON, SAMPLE_REQUESTS_RESULTS_JSON
+from expert_finder.infrastructure.llm.adapters.stub import DeterministicStubLLM
+from expert_finder.infrastructure.logging import setup_logging
 from expert_finder.application.expert_finder.tools.education_search import EducationSearchTool
 from expert_finder.application.expert_finder.tools.work_experience_search import WorkExperienceSearchTool
 from expert_finder.application.expert_finder.tools.profile_compare import ProfileComparisonTool
@@ -12,12 +18,10 @@ from expert_finder.infrastructure.persistence.csv.education_repo import CsvEduca
 from expert_finder.infrastructure.persistence.csv.work_experience_repo import CsvWorkExperienceRepository
 
 
-def main() -> None:
-    questions = json.loads(SAMPLE_REQUESTS_JSON.read_text(encoding="utf-8"))
-
+def build_agent() -> ExpertFinderAgent:
     education_search = EducationSearchTool(education_repo=CsvEducationRepository())
     professional_search = WorkExperienceSearchTool(work_repo=CsvWorkExperienceRepository())
-    agent = ExpertFinderAgent(
+    return ExpertFinderAgent(
         llm=GPTLLM(model=SETTINGS.gpt_model),
         education_search=education_search,
         professional_search=professional_search,
@@ -27,28 +31,28 @@ def main() -> None:
         ),
     )
 
-    results = []
-    for i, item in enumerate(questions):
-        question = item.get("text", "")
-        start_time = time.perf_counter()
-        result, metrics = agent.run_with_metrics(question)
-        elapsed = time.perf_counter() - start_time
-        results.append(
-            {
-                "id": item.get("id"),
-                "question": question,
-                "result": result.model_dump(),
-                "candidate_metrics": metrics,
-                "elapsed_seconds": round(elapsed, 3),
-            }
-        )
-        print(f"Processed question {i + 1}/{len(questions)} in {elapsed:.2f}s")
 
-    SAMPLE_REQUESTS_RESULTS_JSON.write_text(
-        json.dumps(results, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Expert Finder POC")
+    parser.add_argument(
+        "question",
+        type=str,
+        help="Natural-language query",
     )
-    print(f"Wrote {SAMPLE_REQUESTS_RESULTS_JSON} with {len(results)} results")
+    parser.add_argument(
+        "--log-level",
+        type=str,
+        default=os.environ.get("LOG_LEVEL", "INFO"),
+        help="Logging level (e.g., DEBUG, INFO, WARNING)",
+    )
+    args = parser.parse_args()
+
+    setup_logging(args.log_level)
+    # setup_logging('DEBUG')
+
+    agent = build_agent()
+    result = agent.run(args.question)
+    print(json.dumps({"question": args.question, "result": result.model_dump()}, indent=2))
 
 
 if __name__ == "__main__":

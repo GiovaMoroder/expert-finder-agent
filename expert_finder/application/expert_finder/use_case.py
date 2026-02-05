@@ -7,11 +7,11 @@ import logging
 import pprint
 from typing import TypeAlias
 
-from expert_finder.expert_finder.llm.ports import LLMPort
-from expert_finder.expert_finder.tools.education_search import EducationSearchTool
-from expert_finder.expert_finder.tools.work_experience_search import WorkExperienceSearchTool
-from expert_finder.expert_finder.tools.profile_compare import ProfileComparisonTool
-from expert_finder.expert_finder.types.schemas import FinalResult
+from expert_finder.domain.ports import LLMPort
+from expert_finder.application.expert_finder.tools.education_search import EducationSearchTool
+from expert_finder.application.expert_finder.tools.work_experience_search import WorkExperienceSearchTool
+from expert_finder.application.expert_finder.tools.profile_compare import ProfileComparisonTool
+from expert_finder.domain.models import FinalResult
 
 SupportedTool: TypeAlias = EducationSearchTool | WorkExperienceSearchTool
 
