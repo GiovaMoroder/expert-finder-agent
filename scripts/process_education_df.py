@@ -7,7 +7,7 @@ from expert_finder.expert_finder.path import PROCESSED_EDUCATION_CSV, RAW_EDUCAT
 from expert_finder.expert_finder.utils.education_normalization import normalize_school
 
 
-RAW_COLUMNS = ["full_name", "degree", "degree_name", "field_of_study", "school"]
+RAW_COLUMNS = ["full_name", "degree", "degree_name", "field_of_study", "school", "start_date", "end_date"]
 
 
 def _row_to_raw_json(row: pd.Series) -> str:
@@ -22,14 +22,17 @@ def main() -> None:
 
     df = pd.read_csv(input_path)
 
+    start_dates = pd.to_datetime(df.get("start_date"), errors="coerce")
+    end_dates = pd.to_datetime(df.get("end_date"), errors="coerce")
+
     processed = pd.DataFrame(
         {
             "full_name": df.get("full_name"),
             "institution": df.get("school").map(normalize_school) if "school" in df.columns else None,
             "degree": df.get("degree"),
             "field_of_study": df.get("field_of_study"),
-            "start_date": pd.NA,
-            "graduation_date": pd.NA,
+            "start_date": start_dates,
+            "end_date": end_dates,
             "gpa": pd.NA,
             "raw": df.apply(_row_to_raw_json, axis=1),
         }

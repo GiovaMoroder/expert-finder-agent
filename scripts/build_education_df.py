@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas as pd
 
 from expert_finder.expert_finder.path import MENTEES_JSON, RAW_EDUCATION_CSV
+from expert_finder.expert_finder.utils.dates import linkedin_date_to_iso
 
 input_path = MENTEES_JSON
 output_path = RAW_EDUCATION_CSV
@@ -16,6 +17,8 @@ def main() -> None:
     for p in data:
         profile = p.get("linkedin_profile") or {}
         for e in profile.get("education") or []:
+            start_date = linkedin_date_to_iso(e.get("starts_at") or e.get("start_date"))
+            end_date = linkedin_date_to_iso(e.get("ends_at") or e.get("end_date"))
             all_educations.append(
                 {
                     "full_name": profile.get("full_name"),
@@ -23,6 +26,8 @@ def main() -> None:
                     "degree_name": e.get("degree_name"),
                     "field_of_study": e.get("field_of_study"),
                     "school": e.get("school"),
+                    "start_date": start_date,
+                    "end_date": end_date,
                 }
             )
 

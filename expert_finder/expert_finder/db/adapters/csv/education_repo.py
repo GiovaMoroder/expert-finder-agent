@@ -26,7 +26,7 @@ class CsvEducationRepository(CsvRepositoryBase, EducationRepository):
                 degree=row.get("degree"),
                 field_of_study=row.get("field_of_study"),
                 start_date=row.get("start_date"),
-                graduation_date=row.get("graduation_date"),
+                end_date=row.get("end_date"),
                 gpa=row.get("gpa"),
             )
 
@@ -46,7 +46,7 @@ class CsvEducationRepository(CsvRepositoryBase, EducationRepository):
                     degree=row.get("degree"),
                     field_of_study=row.get("field_of_study"),
                     start_date=row.get("start_date"),
-                    graduation_date=row.get("graduation_date"),
+                    end_date=row.get("end_date"),
                     gpa=row.get("gpa"),
                 )
             )
