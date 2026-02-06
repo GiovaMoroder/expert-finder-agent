@@ -6,8 +6,8 @@ import os
 
 from openai import OpenAI
 
-from expert_finder.expert_finder.settings.inf import get_secret as inf_get_secret
-from ..ports import LLMPort, SecretGetter
+from expert_finder.infrastructure.settings.inf import get_secret as inf_get_secret
+from expert_finder.domain.ports import LLMPort, SecretGetter
 
 
 class GPTLLM(LLMPort):

@@ -20,7 +20,7 @@ def get_llm_client():
     Initialize and return an OpenAI client using Infisical to get the API key.
     """
     # Import after path is set up
-    from expert_finder.expert_finder.settings.inf import get_secret
+    from expert_finder.infrastructure.settings.inf import get_secret
 
     env = os.environ.get("ENVIRONMENT", "staging")
 

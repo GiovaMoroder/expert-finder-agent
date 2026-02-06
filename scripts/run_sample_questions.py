@@ -1,20 +1,22 @@
 import json
 import time
 
-from expert_finder.expert_finder.agent.expert_finder import ExpertFinderAgent
-from expert_finder.expert_finder.config import SETTINGS
-from expert_finder.expert_finder.llm.adapters.gpt import GPTLLM
-from expert_finder.expert_finder.path import SAMPLE_REQUESTS_JSON, SAMPLE_REQUESTS_RESULTS_JSON
-from expert_finder.expert_finder.tools.education_search import EducationSearchTool
-from expert_finder.expert_finder.tools.work_experience_search import WorkExperienceSearchTool
-from expert_finder.expert_finder.tools.profile_compare import ProfileComparisonTool
+from expert_finder.application.expert_finder.use_case import ExpertFinderAgent
+from expert_finder.infrastructure.config import SETTINGS
+from expert_finder.infrastructure.llm.adapters.gpt import GPTLLM
+from expert_finder.infrastructure.path import SAMPLE_REQUESTS_JSON, SAMPLE_REQUESTS_RESULTS_JSON
+from expert_finder.application.expert_finder.tools.education_search import EducationSearchTool
+from expert_finder.application.expert_finder.tools.work_experience_search import WorkExperienceSearchTool
+from expert_finder.application.expert_finder.tools.profile_compare import ProfileComparisonTool
+from expert_finder.infrastructure.persistence.csv.education_repo import CsvEducationRepository
+from expert_finder.infrastructure.persistence.csv.work_experience_repo import CsvWorkExperienceRepository
 
 
 def main() -> None:
     questions = json.loads(SAMPLE_REQUESTS_JSON.read_text(encoding="utf-8"))
 
-    education_search = EducationSearchTool()
-    professional_search = WorkExperienceSearchTool()
+    education_search = EducationSearchTool(education_repo=CsvEducationRepository())
+    professional_search = WorkExperienceSearchTool(work_repo=CsvWorkExperienceRepository())
     agent = ExpertFinderAgent(
         llm=GPTLLM(model=SETTINGS.gpt_model),
         education_search=education_search,

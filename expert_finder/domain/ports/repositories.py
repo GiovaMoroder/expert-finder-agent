@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Iterable
 
-from expert_finder.expert_finder.db.models import EducationRecord, WorkExperienceRecord
+from expert_finder.domain.models import EducationRecord, WorkExperienceRecord
 
 
 class WorkExperienceRepository(ABC):

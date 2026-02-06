@@ -7,11 +7,11 @@ import logging
 import pprint
 from typing import TypeAlias
 
-from expert_finder.expert_finder.llm.ports import LLMPort
-from expert_finder.expert_finder.tools.education_search import EducationSearchTool
-from expert_finder.expert_finder.tools.work_experience_search import WorkExperienceSearchTool
-from expert_finder.expert_finder.tools.profile_compare import ProfileComparisonTool
-from expert_finder.expert_finder.types.schemas import FinalResult
+from expert_finder.domain.ports import LLMPort
+from expert_finder.application.expert_finder.tools.education_search import EducationSearchTool
+from expert_finder.application.expert_finder.tools.work_experience_search import WorkExperienceSearchTool
+from expert_finder.application.expert_finder.tools.profile_compare import ProfileComparisonTool
+from expert_finder.domain.models import FinalResult
 
 SupportedTool: TypeAlias = EducationSearchTool | WorkExperienceSearchTool
 
@@ -41,17 +41,17 @@ class ExpertFinderAgent:
         # Retrieve candidates based on their education
         edu_results = self.use_search_tool(self.education_search, question)
         logger.debug(
-            "Education tool returned %d candidates (first up to 5): %s",
-            len(edu_results),
-            edu_results[:5],
+            "Education tool returned %d candidates (first up to 5)",
+            len(edu_results)
+            # edu_results[:5],
         )
 
         # Retrieve candidates based on their professional experience
         professional_results = self.use_search_tool(self.professional_search, question)
         logger.debug(
-            "Work experience tool returned %d candidates (first up to 5): %s",
-            len(professional_results),
-            professional_results[:5],
+            "Work experience tool returned %d candidates (first up to 5)",
+            len(professional_results)
+            # professional_results[:5],
         )
 
         candidate_names = set(edu_results) | set(professional_results)
@@ -67,8 +67,7 @@ class ExpertFinderAgent:
 
         # Compare candidates based on their profiles
         profiles = self.profile_compare.build_profiles(candidate_names)
-        if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("Profiles payload:\n%s", pprint.pformat(profiles, width=100))
+        # logger.debug("Profiles payload:\n%s", pprint.pformat(profiles, width=100))
         result = self.profile_compare.compare_profiles(
             question,
             profiles,

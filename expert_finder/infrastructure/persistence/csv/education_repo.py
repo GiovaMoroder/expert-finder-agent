@@ -5,10 +5,10 @@ from typing import Iterable
 
 import pandas as pd
 
-from expert_finder.expert_finder.db.adapters.csv.csv_base import CsvRepositoryBase
-from expert_finder.expert_finder.db.models import EducationRecord
-from expert_finder.expert_finder.db.ports import EducationRepository
-from expert_finder.expert_finder.path import EDUCATION_CSV
+from expert_finder.infrastructure.persistence.csv.csv_base import CsvRepositoryBase
+from expert_finder.domain.models import EducationRecord
+from expert_finder.domain.ports import EducationRepository
+from expert_finder.infrastructure.path import EDUCATION_CSV
 
 
 class CsvEducationRepository(CsvRepositoryBase, EducationRepository):

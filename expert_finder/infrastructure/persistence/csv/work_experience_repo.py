@@ -3,10 +3,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable
 
-from expert_finder.expert_finder.db.adapters.csv.csv_base import CsvRepositoryBase
-from expert_finder.expert_finder.db.models import WorkExperienceRecord
-from expert_finder.expert_finder.db.ports import WorkExperienceRepository
-from expert_finder.expert_finder.path import WORK_EXPERIENCES_CSV
+from expert_finder.infrastructure.persistence.csv.csv_base import CsvRepositoryBase
+from expert_finder.domain.models import WorkExperienceRecord
+from expert_finder.domain.ports import WorkExperienceRepository
+from expert_finder.infrastructure.path import WORK_EXPERIENCES_CSV
 
 
 class CsvWorkExperienceRepository(CsvRepositoryBase, WorkExperienceRepository):

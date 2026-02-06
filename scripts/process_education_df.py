@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from expert_finder.expert_finder.path import PROCESSED_EDUCATION_CSV, RAW_EDUCATION_CSV
-from expert_finder.expert_finder.utils.education_normalization import normalize_school
+from expert_finder.infrastructure.path import PROCESSED_EDUCATION_CSV, RAW_EDUCATION_CSV
+from expert_finder.domain.education_normalization import normalize_school
 
 
 RAW_COLUMNS = ["full_name", "degree", "degree_name", "field_of_study", "school", "start_date", "end_date"]
