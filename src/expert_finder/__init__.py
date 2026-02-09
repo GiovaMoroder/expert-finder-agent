@@ -1,2 +1,0 @@
-"""Expert Finder package."""
-

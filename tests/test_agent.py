@@ -1,8 +1,8 @@
-from expert_finder.domain.agents.expert_finder import ExpertFinderAgent
-from expert_finder.domain.tools.education_search import EducationSearchTool
-from expert_finder.domain.tools.profile_compare import ProfileComparisonTool
-from expert_finder.domain.tools.work_experience_search import WorkExperienceSearchTool
+from expert_finder.application.expert_finder.use_case import ExpertFinderAgent
 from expert_finder.infrastructure.llm.adapters.stub import DeterministicStubLLM
+from expert_finder.application.expert_finder.tools.education_search import EducationSearchTool
+from expert_finder.application.expert_finder.tools.work_experience_search import WorkExperienceSearchTool
+from expert_finder.application.expert_finder.tools.profile_compare import ProfileComparisonTool
 from expert_finder.infrastructure.persistence.csv.education_repo import CsvEducationRepository
 from expert_finder.infrastructure.persistence.csv.work_experience_repo import CsvWorkExperienceRepository
 
