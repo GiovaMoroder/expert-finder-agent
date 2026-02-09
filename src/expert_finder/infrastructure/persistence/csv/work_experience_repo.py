@@ -10,7 +10,9 @@ from expert_finder.infrastructure.path import WORK_EXPERIENCES_CSV
 
 
 class CsvWorkExperienceRepository(CsvRepositoryBase, WorkExperienceRepository):
-    SEARCH_COLUMNS = ("company",)
+    # Search across multiple fields since "institution" signals may appear in
+    # company name, role, or free-text descriptions (e.g. "OpenAI API", "OpenAI Gym").
+    SEARCH_COLUMNS = ("company", "role", "description")
 
     def __init__(self, csv_path: Path = WORK_EXPERIENCES_CSV) -> None:
         super().__init__(csv_path)
