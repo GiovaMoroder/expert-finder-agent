@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+# File is at: <repo>/src/expert_finder/infrastructure/path.py
+# parents[0]=infrastructure, [1]=expert_finder, [2]=src, [3]=<repo>
+REPO_ROOT = Path(__file__).resolve().parents[3]
 DATA_DIR = REPO_ROOT / "data"
 
 RAW_EDUCATION_CSV = DATA_DIR / "raw" / "education.csv"
