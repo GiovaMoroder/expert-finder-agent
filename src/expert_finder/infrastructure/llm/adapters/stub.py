@@ -53,6 +53,8 @@ class DeterministicStubLLM(LLMPort):
             "institution": institution if tool_required else None,
             "role": role,
             "topic": topic,
+            "sort_by": None,
+            "sort_order": None,
         }
 
     @staticmethod
