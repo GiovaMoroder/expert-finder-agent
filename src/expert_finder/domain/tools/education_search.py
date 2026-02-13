@@ -39,6 +39,7 @@ class EducationSearchTool:
             sort_order=sort_order,
         )
 
+    # TODO: consider using sorting by date as a default in the tool
     def build_tool_args(self, question: str, llm: LLMPort) -> QueryExtraction:
         """Build tool arguments from the question for education search."""
 
@@ -74,9 +75,12 @@ class EducationSearchTool:
             
             SORTING RULES:
             - Allowed sortable columns for education are: __SORTABLE_COLUMNS__.
-            - Set sort_by to one of those columns when user asks to sort.
-            - Set sort_order to "asc" or "desc" when sort_by is set.
-            - If user does not request sorting, set sort_by = null and sort_order = null.
+            - Infer sorting from context, even when user does not explicitly say "sort by".
+            - If the user asks for recency/current/latest/recently, set sort_by = "start_date" and sort_order = "desc".
+            - If the user asks for oldest/earliest/first, set sort_by = "start_date" and sort_order = "asc".
+            - If the user explicitly asks for a specific sortable column, use it exactly.
+            - Never invent field names.
+            - Default behavior: if no sorting intent is present, set sort_by = "start_date" and sort_order = "desc".
 
             OUTPUT CONSTRAINTS:
             - Return ONLY valid JSON.
