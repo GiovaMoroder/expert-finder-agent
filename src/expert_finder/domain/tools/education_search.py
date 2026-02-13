@@ -6,7 +6,7 @@ from dataclasses import fields
 from typing import Literal
 
 from expert_finder.domain.education_normalization import normalize_school
-from expert_finder.domain.models import EducationRecord
+from expert_finder.domain.models import EducationRecord, RankingRule
 from expert_finder.domain.ports import EducationRepository
 from expert_finder.domain.ports import LLMPort
 from expert_finder.domain.models import QueryExtraction
@@ -15,28 +15,33 @@ from expert_finder.domain.models import QueryExtraction
 class EducationSearchTool:
     """Search education data with fuzzy matching."""
 
-    SORTABLE_COLUMNS = tuple(field.name for field in fields(EducationRecord))
+    AVAILABLE_COLUMNS = tuple(field.name for field in fields(EducationRecord))
+    DEFAULT_FILTER_COLUMN = "institution"
 
     def __init__(self, education_repo: EducationRepository | None = None) -> None:
         self.education_repo = education_repo
 
     def search(
         self,
-        query: str,
+        filter_column: str,
+        filter_value: str,
         top_k: int = 10,
         min_score: float = 0.0,
         sort_by: str | None = None,
         sort_order: Literal["asc", "desc"] | None = None,
+        ranking: dict[str, RankingRule] | None = None,
     ) -> list[str]:
-        normalized_query = normalize_school(query)
+        normalized_query = normalize_school(filter_value)
         if normalized_query is None:
             return []
         return self.education_repo.search(
-            normalized_query,
+            filter_column=filter_column,
+            filter_value=normalized_query,
             top_k=top_k,
             min_score=min_score,
             sort_by=sort_by,
             sort_order=sort_order,
+            ranking=ranking,
         )
 
     # TODO: consider using sorting by date as a default in the tool
@@ -60,11 +65,16 @@ class EducationSearchTool:
             - Set tool_required = false if the search should be based only on professional experience
               or current role, and education is not relevant.
             
+            FILTER RULES:
+            - Allowed columns are: __AVAILABLE_COLUMNS__.
+            - Pick exactly one filter_column and one filter_value when tool_required = true.
+            - Prefer filter_column = "__DEFAULT_FILTER_COLUMN__" unless the user clearly asks for another column.
+            - If tool_required = false, set filter_column = null and filter_value = null.
+
             FIELD EXTRACTION RULES:
-            - institution:
-              - Populate ONLY if tool_required = true.
-              - Use the school or university explicitly mentioned by the user.
-              - If education is relevant but no institution is mentioned, set to null.
+            - institution is a legacy compatibility field.
+            - If tool_required = true and the user mentions a school, set institution to that school.
+            - Otherwise set institution = null.
             - role:
               - Populate with a professional role or title if mentioned (e.g. "data scientist").
               - Otherwise, set to null.
@@ -74,13 +84,25 @@ class EducationSearchTool:
               - Otherwise, set to null.
             
             SORTING RULES:
-            - Allowed sortable columns for education are: __SORTABLE_COLUMNS__.
+            - Allowed sortable columns for education are: __AVAILABLE_COLUMNS__.
             - Infer sorting from context, even when user does not explicitly say "sort by".
             - If the user asks for recency/current/latest/recently, set sort_by = "start_date" and sort_order = "desc".
             - If the user asks for oldest/earliest/first, set sort_by = "start_date" and sort_order = "asc".
             - If the user explicitly asks for a specific sortable column, use it exactly.
             - Never invent field names.
             - Default behavior: if no sorting intent is present, set sort_by = "start_date" and sort_order = "desc".
+
+            RANKING RULES:
+            - ranking is optional. If not needed, set ranking = null.
+            - ranking must be a JSON object keyed by column name, with value:
+              {"weight": number, "keyword": string}
+            - Use only allowed columns as ranking keys.
+            - Weights are non-negative and will be normalized later.
+            - Example:
+              {
+                "field_of_study": {"weight": 0.6, "keyword": "data science"},
+                "degree": {"weight": 0.4, "keyword": "master"}
+              }
 
             OUTPUT CONSTRAINTS:
             - Return ONLY valid JSON.
@@ -90,16 +112,20 @@ class EducationSearchTool:
             {
               "tool_required": boolean,
               "institution": string | null,
+              "filter_column": string | null,
+              "filter_value": string | null,
               "role": string | null,
               "topic": string | null,
               "sort_by": string | null,
-              "sort_order": "asc" | "desc" | null
+              "sort_order": "asc" | "desc" | null,
+              "ranking": { "<column_name>": { "weight": number, "keyword": string } } | null
             }
 
             Schema: QueryExtraction
             """
         )
-        system_prompt = system_prompt.replace("__SORTABLE_COLUMNS__", ", ".join(self.SORTABLE_COLUMNS))
+        system_prompt = system_prompt.replace("__AVAILABLE_COLUMNS__", ", ".join(self.AVAILABLE_COLUMNS))
+        system_prompt = system_prompt.replace("__DEFAULT_FILTER_COLUMN__", self.DEFAULT_FILTER_COLUMN)
         user_prompt = question
         extraction = llm.call_json(QueryExtraction, system_prompt, user_prompt)
         return extraction
@@ -116,7 +142,7 @@ if __name__ == "__main__":
     tool = EducationSearchTool()
     for query in ("epfl", "Trieste"):
         print(f"Query: {query}")
-        results = tool.search(query, top_k=10, min_score=0.5)
+        results = tool.search("institution", query, top_k=10, min_score=0.5)
         unique_names = sorted(set(results))
         if unique_names:
             records = tool.get_records(unique_names)
