@@ -64,6 +64,7 @@ class WorkExperienceSearchTool:
             - Allowed columns are: __AVAILABLE_COLUMNS__.
             - Pick exactly one filter_column and one filter_value when tool_required = true.
             - Prefer filter_column = "__DEFAULT_FILTER_COLUMN__" unless the user clearly asks for another column.
+            - Prefer using institution whenever available as the filtering parameter.
             - If tool_required = false, set filter_column = null and filter_value = null.
 
             FIELD EXTRACTION RULES:
@@ -81,7 +82,11 @@ class WorkExperienceSearchTool:
             - Default behavior: if no sorting intent is present, set sort_by = "start_date" and sort_order = "desc".
 
             RANKING RULES:
-            - ranking is optional. If not needed, set ranking = null.
+            - ranking is optional, but strongly recommended whenever it can improve relevance.
+            - Good ranking candidates include role/title and related profile signals:
+              - role
+              - description
+              - company
             - ranking must be a JSON object keyed by column name, with value:
               {"weight": number, "keyword": string}
             - Use only allowed columns as ranking keys.
