@@ -79,6 +79,7 @@ class ExpertFinderAgent:
             question,
             profiles,
             self.llm,
+            search_context=query_parameters,
         )
         profile_by_name = {profile["name"]: profile for profile in profiles}
         enriched_experts = []
@@ -106,12 +107,11 @@ class ExpertFinderAgent:
         if tool_args.tool_required:
             filter_column = tool_args.filter_column
             filter_value = tool_args.filter_value
-            if isinstance(tool, EducationSearchTool):
-                filter_column = filter_column or EducationSearchTool.DEFAULT_FILTER_COLUMN
-            if isinstance(tool, WorkExperienceSearchTool):
-                filter_column = filter_column or WorkExperienceSearchTool.DEFAULT_FILTER_COLUMN
-            if not filter_column or not filter_value:
-                return [], tool_args
+            if filter_value and not filter_column:
+                if isinstance(tool, EducationSearchTool):
+                    filter_column = EducationSearchTool.DEFAULT_FILTER_COLUMN
+                if isinstance(tool, WorkExperienceSearchTool):
+                    filter_column = WorkExperienceSearchTool.DEFAULT_FILTER_COLUMN
             return tool.search(
                 filter_column=filter_column,
                 filter_value=filter_value,

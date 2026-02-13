@@ -22,8 +22,8 @@ class WorkExperienceSearchTool:
 
     def search(
         self,
-        filter_column: str,
-        filter_value: str,
+        filter_column: str | None = None,
+        filter_value: str | None = None,
         top_k: int = 10,
         min_score: float = 0.0,
         sort_by: str | None = None,
@@ -63,15 +63,19 @@ class WorkExperienceSearchTool:
             OBJECTIVE RULE:
             - The objective is to find people who can help the asker reach their target opportunity.
             - Prioritize the target institution/opportunity context over the asker's background context.
+            - Role disambiguation: treat "quant" as a job role (quantitative researcher), not generic
+              quantitative skills.
 
             FILTER RULES:
             - Allowed columns are: __AVAILABLE_COLUMNS__.
-            - Pick exactly one filter_column and one filter_value when tool_required = true.
+            - Filtering is optional.
+            - Set filter_column and filter_value only when a target institution/company is explicitly present.
             - Prefer filter_column = "__DEFAULT_FILTER_COLUMN__" unless the user clearly asks for another column.
             - Strong rule: if the user mentions an institution/company/organization, use it as filter_value and set
               filter_column = "__DEFAULT_FILTER_COLUMN__" unless the user explicitly asks another column.
             - If multiple institutions are mentioned, choose the one linked to the desired position/interview/
               application/lab where help is requested, not the one describing the asker's current affiliation.
+            - If no target institution/company is mentioned, set filter_column = null and filter_value = null.
             - If tool_required = false, set filter_column = null and filter_value = null.
 
             SORTING RULES:
@@ -89,6 +93,13 @@ class WorkExperienceSearchTool:
               - role
               - description
               - company
+            - If the user explicitly asks for a person type/role (e.g., "quant", "research engineer"),
+              prioritize role matching and use ranking on "role"
+            - In that case, set keyword to the target role term (e.g., "quant"), not to contextual chatter.
+            - Do NOT use conversational/support terms as ranking keywords (e.g., "coffee chat", "advice",
+              "help", "chiacchierata").
+            - Do NOT use first-person background details as ranking keywords unless explicitly requested as
+              target criteria
             - ranking must be a JSON object keyed by column name, with value:
               {"weight": number, "keyword": string}
             - Use only allowed columns as ranking keys.

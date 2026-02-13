@@ -55,8 +55,8 @@ class CsvEducationRepository(CsvRepositoryBase, EducationRepository):
 
     def search(
         self,
-        filter_column: str,
-        filter_value: str,
+        filter_column: str | None = None,
+        filter_value: str | None = None,
         top_k: int = 10,
         min_score: float = 0.0,
         sort_by: str | None = None,
