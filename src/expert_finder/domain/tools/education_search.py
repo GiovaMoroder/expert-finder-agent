@@ -69,13 +69,9 @@ class EducationSearchTool:
             - Allowed columns are: __AVAILABLE_COLUMNS__.
             - Pick exactly one filter_column and one filter_value when tool_required = true.
             - Prefer filter_column = "__DEFAULT_FILTER_COLUMN__" unless the user clearly asks for another column.
-            - Prefer using institution whenever available as the filtering parameter.
+            - Strong rule: if the user mentions a school/university/institution, use it as filter_value and set
+              filter_column = "__DEFAULT_FILTER_COLUMN__" unless the user explicitly asks another column.
             - If tool_required = false, set filter_column = null and filter_value = null.
-
-            FIELD EXTRACTION RULES:
-            - institution is a legacy compatibility field.
-            - If tool_required = true and the user mentions a school, set institution to that school.
-            - Otherwise set institution = null.
             
             SORTING RULES:
             - Allowed sortable columns for education are: __AVAILABLE_COLUMNS__.
@@ -108,7 +104,6 @@ class EducationSearchTool:
             
             {
               "tool_required": boolean,
-              "institution": string | null,
               "filter_column": string | null,
               "filter_value": string | null,
               "sort_by": string | null,

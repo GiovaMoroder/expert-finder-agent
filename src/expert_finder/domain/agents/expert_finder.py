@@ -105,7 +105,7 @@ class ExpertFinderAgent:
         )
         if tool_args.tool_required:
             filter_column = tool_args.filter_column
-            filter_value = tool_args.filter_value or tool_args.institution
+            filter_value = tool_args.filter_value
             if isinstance(tool, EducationSearchTool):
                 filter_column = filter_column or EducationSearchTool.DEFAULT_FILTER_COLUMN
             if isinstance(tool, WorkExperienceSearchTool):
