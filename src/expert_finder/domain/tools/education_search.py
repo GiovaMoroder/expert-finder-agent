@@ -75,13 +75,6 @@ class EducationSearchTool:
             - institution is a legacy compatibility field.
             - If tool_required = true and the user mentions a school, set institution to that school.
             - Otherwise set institution = null.
-            - role:
-              - Populate with a professional role or title if mentioned (e.g. "data scientist").
-              - Otherwise, set to null.
-            - topic:
-              - Populate with a subject area, field, or expertise the user is interested in
-                (e.g. "reinforcement learning", "econometrics").
-              - Otherwise, set to null.
             
             SORTING RULES:
             - Allowed sortable columns for education are: __AVAILABLE_COLUMNS__.
@@ -114,8 +107,6 @@ class EducationSearchTool:
               "institution": string | null,
               "filter_column": string | null,
               "filter_value": string | null,
-              "role": string | null,
-              "topic": string | null,
               "sort_by": string | null,
               "sort_order": "asc" | "desc" | null,
               "ranking": { "<column_name>": { "weight": number, "keyword": string } } | null

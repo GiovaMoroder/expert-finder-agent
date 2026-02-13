@@ -27,8 +27,6 @@ class QueryExtraction(BaseModel):
     )
     filter_column: Optional[str] = Field(default=None, description="Single column name used for filtering")
     filter_value: Optional[str] = Field(default=None, description="Value used to filter in filter_column")
-    role: Optional[str] = Field(default=None, description="Target role, if present")
-    topic: Optional[str] = Field(default=None, description="Short topic, if present")
     sort_by: Optional[str] = Field(default=None, description="Column name to sort by")
     sort_order: Literal["asc", "desc"] | None = Field(
         default=None,
