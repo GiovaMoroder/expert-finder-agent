@@ -60,12 +60,18 @@ class WorkExperienceSearchTool:
             - Set tool_required = false if the search should be based only on education
               and professional experience is not relevant.
 
+            OBJECTIVE RULE:
+            - The objective is to find people who can help the asker reach their target opportunity.
+            - Prioritize the target institution/opportunity context over the asker's background context.
+
             FILTER RULES:
             - Allowed columns are: __AVAILABLE_COLUMNS__.
             - Pick exactly one filter_column and one filter_value when tool_required = true.
             - Prefer filter_column = "__DEFAULT_FILTER_COLUMN__" unless the user clearly asks for another column.
             - Strong rule: if the user mentions an institution/company/organization, use it as filter_value and set
               filter_column = "__DEFAULT_FILTER_COLUMN__" unless the user explicitly asks another column.
+            - If multiple institutions are mentioned, choose the one linked to the desired position/interview/
+              application/lab where help is requested, not the one describing the asker's current affiliation.
             - If tool_required = false, set filter_column = null and filter_value = null.
 
             SORTING RULES:
