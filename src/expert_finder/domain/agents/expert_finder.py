@@ -97,5 +97,9 @@ class ExpertFinderAgent:
             tool_args.model_dump(mode="json"),
         )
         if tool_args.tool_required and tool_args.institution:
-            return tool.search(tool_args.institution)
+            return tool.search(
+                tool_args.institution,
+                sort_by=tool_args.sort_by,
+                sort_order=tool_args.sort_order,
+            )
         return []

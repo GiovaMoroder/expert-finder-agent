@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import Iterable
+from typing import Literal
 
 from expert_finder.domain.models import EducationRecord, WorkExperienceRecord
 
@@ -16,7 +17,14 @@ class WorkExperienceRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def search(self, query: str, top_k: int = 10, min_score: float = 0.0) -> list[str]:
+    def search(
+        self,
+        query: str,
+        top_k: int = 10,
+        min_score: float = 0.0,
+        sort_by: str | None = None,
+        sort_order: Literal["asc", "desc"] | None = None,
+    ) -> list[str]:
         raise NotImplementedError
 
 
@@ -30,5 +38,12 @@ class EducationRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def search(self, query: str, top_k: int = 10, min_score: float = 0.0) -> list[str]:
+    def search(
+        self,
+        query: str,
+        top_k: int = 10,
+        min_score: float = 0.0,
+        sort_by: str | None = None,
+        sort_order: Literal["asc", "desc"] | None = None,
+    ) -> list[str]:
         raise NotImplementedError

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from typing import Literal
 from typing import Optional
 
 from pydantic import BaseModel, Field
@@ -18,6 +19,11 @@ class QueryExtraction(BaseModel):
     institution: Optional[str] = Field(default=None, description="Target company or school")
     role: Optional[str] = Field(default=None, description="Target role, if present")
     topic: Optional[str] = Field(default=None, description="Short topic, if present")
+    sort_by: Optional[str] = Field(default=None, description="Column name to sort by")
+    sort_order: Literal["asc", "desc"] | None = Field(
+        default=None,
+        description="Sort direction. Must be 'asc' or 'desc' when sort_by is set.",
+    )
 
 
 class FinalExpert(BaseModel):

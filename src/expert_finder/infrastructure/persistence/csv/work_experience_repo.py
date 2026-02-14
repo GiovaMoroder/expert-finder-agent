@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Iterable
+from typing import Literal
 
 from expert_finder.infrastructure.persistence.csv.csv_base import CsvRepositoryBase
 from expert_finder.domain.models import WorkExperienceRecord
@@ -52,7 +53,22 @@ class CsvWorkExperienceRepository(CsvRepositoryBase, WorkExperienceRepository):
             )
         return results
 
-    def search(self, query: str, top_k: int = 10, min_score: float = 0.0) -> list[str]:
+    def search(
+        self,
+        query: str,
+        top_k: int = 10,
+        min_score: float = 0.0,
+        sort_by: str | None = None,
+        sort_order: Literal["asc", "desc"] | None = None,
+    ) -> list[str]:
         df = self._load()
         self._apply_norm_columns(df, self.SEARCH_COLUMNS)
-        return self._search_dataframe(df, query, self.SEARCH_COLUMNS, top_k, min_score)
+        return self._search_dataframe(
+            df,
+            query,
+            self.SEARCH_COLUMNS,
+            top_k,
+            min_score,
+            sort_by=sort_by,
+            sort_order=sort_order,
+        )

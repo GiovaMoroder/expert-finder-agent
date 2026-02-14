@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from dataclasses import fields
+from typing import Literal
+
+from expert_finder.domain.models import WorkExperienceRecord
 from expert_finder.domain.ports import WorkExperienceRepository
 from expert_finder.domain.ports import LLMPort
 from expert_finder.domain.models import QueryExtraction
@@ -10,11 +14,26 @@ from expert_finder.domain.models import QueryExtraction
 class WorkExperienceSearchTool:
     """Return all members who worked at an institution."""
 
+    SORTABLE_COLUMNS = tuple(field.name for field in fields(WorkExperienceRecord))
+
     def __init__(self, work_repo: WorkExperienceRepository | None = None) -> None:
         self.work_repo = work_repo
 
-    def search(self, query: str, top_k: int = 10) -> list[str]:
-        return self.work_repo.search(query, top_k=top_k)
+    def search(
+        self,
+        query: str,
+        top_k: int = 10,
+        min_score: float = 0.0,
+        sort_by: str | None = None,
+        sort_order: Literal["asc", "desc"] | None = None,
+    ) -> list[str]:
+        return self.work_repo.search(
+            query,
+            top_k=top_k,
+            min_score=min_score,
+            sort_by=sort_by,
+            sort_order=sort_order,
+        )
 
     def build_tool_args(self, question: str, llm: LLMPort) -> QueryExtraction:
         """Build tool arguments from the question for professional search."""
@@ -49,6 +68,15 @@ class WorkExperienceSearchTool:
                 (e.g. "reinforcement learning", "econometrics").
               - Otherwise, set to null.
 
+            SORTING RULES:
+            - Allowed sortable columns for work experience are: __SORTABLE_COLUMNS__.
+            - Infer sorting from context, even when user does not explicitly say "sort by".
+            - If the user asks for recency/current/latest/recently, set sort_by = "start_date" and sort_order = "desc".
+            - If the user asks for oldest/earliest/first, set sort_by = "start_date" and sort_order = "asc".
+            - If the user explicitly asks for a specific sortable column, use it exactly.
+            - Never invent field names.
+            - Default behavior: if no sorting intent is present, set sort_by = "start_date" and sort_order = "desc".
+
             OUTPUT CONSTRAINTS:
             - Return ONLY valid JSON.
             - Do NOT include explanations, comments, or extra text.
@@ -58,12 +86,15 @@ class WorkExperienceSearchTool:
               "tool_required": boolean,
               "institution": string | null,
               "role": string | null,
-              "topic": string | null
+              "topic": string | null,
+              "sort_by": string | null,
+              "sort_order": "asc" | "desc" | null
             }
 
             Schema: QueryExtraction
             """
         )
+        system_prompt = system_prompt.replace("__SORTABLE_COLUMNS__", ", ".join(self.SORTABLE_COLUMNS))
         user_prompt = question
         extraction = llm.call_json(QueryExtraction, system_prompt, user_prompt)
         return extraction
