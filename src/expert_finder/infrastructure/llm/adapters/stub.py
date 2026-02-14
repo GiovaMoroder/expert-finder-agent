@@ -49,7 +49,6 @@ class DeterministicStubLLM(LLMPort):
         default_filter_column = "company" if "professional experience" in system_prompt.lower() else "institution"
         return {
             "tool_required": tool_required,
-            "institution": institution if tool_required else None,
             "filter_column": default_filter_column if tool_required else None,
             "filter_value": institution if tool_required else None,
             "ranking": None,

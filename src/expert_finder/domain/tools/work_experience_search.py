@@ -22,8 +22,8 @@ class WorkExperienceSearchTool:
 
     def search(
         self,
-        filter_column: str,
-        filter_value: str,
+        filter_column: str | None = None,
+        filter_value: str | None = None,
         top_k: int = 10,
         min_score: float = 0.0,
         sort_by: str | None = None,
@@ -60,17 +60,23 @@ class WorkExperienceSearchTool:
             - Set tool_required = false if the search should be based only on education
               and professional experience is not relevant.
 
+            OBJECTIVE RULE:
+            - The objective is to find people who can help the asker reach their target opportunity.
+            - Prioritize the target institution/opportunity context over the asker's background context.
+            - Role disambiguation: treat "quant" as a job role (quantitative researcher), not generic
+              quantitative skills.
+
             FILTER RULES:
             - Allowed columns are: __AVAILABLE_COLUMNS__.
-            - Pick exactly one filter_column and one filter_value when tool_required = true.
+            - Filtering is optional.
+            - Set filter_column and filter_value only when a target institution/company is explicitly present.
             - Prefer filter_column = "__DEFAULT_FILTER_COLUMN__" unless the user clearly asks for another column.
-            - Prefer using institution whenever available as the filtering parameter.
+            - Strong rule: if the user mentions an institution/company/organization, use it as filter_value and set
+              filter_column = "__DEFAULT_FILTER_COLUMN__" unless the user explicitly asks another column.
+            - If multiple institutions are mentioned, choose the one linked to the desired position/interview/
+              application/lab where help is requested, not the one describing the asker's current affiliation.
+            - If no target institution/company is mentioned, set filter_column = null and filter_value = null.
             - If tool_required = false, set filter_column = null and filter_value = null.
-
-            FIELD EXTRACTION RULES:
-            - institution is a legacy compatibility field.
-            - If tool_required = true and the user mentions a company or organization, set institution to it.
-            - Otherwise set institution = null.
 
             SORTING RULES:
             - Allowed sortable columns for work experience are: __AVAILABLE_COLUMNS__.
@@ -87,6 +93,13 @@ class WorkExperienceSearchTool:
               - role
               - description
               - company
+            - If the user explicitly asks for a person type/role (e.g., "quant", "research engineer"),
+              prioritize role matching and use ranking on "role"
+            - In that case, set keyword to the target role term (e.g., "quant"), not to contextual chatter.
+            - Do NOT use conversational/support terms as ranking keywords (e.g., "coffee chat", "advice",
+              "help", "chiacchierata").
+            - Do NOT use first-person background details as ranking keywords unless explicitly requested as
+              target criteria
             - ranking must be a JSON object keyed by column name, with value:
               {"weight": number, "keyword": string}
             - Use only allowed columns as ranking keys.
@@ -97,15 +110,6 @@ class WorkExperienceSearchTool:
                 "description": {"weight": 0.3, "keyword": "LLM"}
               }
 
-            SORTING RULES:
-            - Allowed sortable columns for work experience are: __SORTABLE_COLUMNS__.
-            - Infer sorting from context, even when user does not explicitly say "sort by".
-            - If the user asks for recency/current/latest/recently, set sort_by = "start_date" and sort_order = "desc".
-            - If the user asks for oldest/earliest/first, set sort_by = "start_date" and sort_order = "asc".
-            - If the user explicitly asks for a specific sortable column, use it exactly.
-            - Never invent field names.
-            - Default behavior: if no sorting intent is present, set sort_by = "start_date" and sort_order = "desc".
-
             OUTPUT CONSTRAINTS:
             - Return ONLY valid JSON.
             - Do NOT include explanations, comments, or extra text.
@@ -113,7 +117,6 @@ class WorkExperienceSearchTool:
 
             {
               "tool_required": boolean,
-              "institution": string | null,
               "filter_column": string | null,
               "filter_value": string | null,
               "sort_by": string | null,

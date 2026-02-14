@@ -21,10 +21,6 @@ class RankingRule(BaseModel):
 
 class QueryExtraction(BaseModel):
     tool_required: bool = Field(..., description="Whether a tool should be called")
-    institution: Optional[str] = Field(
-        default=None,
-        description="Legacy target company or school field kept for backward compatibility",
-    )
     filter_column: Optional[str] = Field(default=None, description="Single column name used for filtering")
     filter_value: Optional[str] = Field(default=None, description="Value used to filter in filter_column")
     sort_by: Optional[str] = Field(default=None, description="Column name to sort by")

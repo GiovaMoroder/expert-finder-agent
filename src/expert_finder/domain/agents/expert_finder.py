@@ -31,12 +31,12 @@ class ExpertFinderAgent:
         self.profile_compare = profile_compare
 
     def run(self, question: str) -> FinalResult:
-        result, _, _ = self.run_with_metrics(question)
+        result, _, _, _ = self.run_with_metrics(question)
         return result
 
     def run_with_metrics(
         self, question: str
-    ) -> tuple[FinalResult, dict[str, int], dict[str, dict[str, Any]]]:
+    ) -> tuple[FinalResult, dict[str, int], dict[str, dict[str, Any]], list[dict[str, Any]]]:
         logger = logging.getLogger(self.__class__.__name__)
         logger.info("Starting expert finder run.")
         logger.debug("Question: %s", question)
@@ -61,7 +61,7 @@ class ExpertFinderAgent:
             "professional_search": professional_tool_args.model_dump(mode="json"),
         }
 
-        candidate_names = set(edu_results) | set(professional_results)
+        candidate_names = list(dict.fromkeys(edu_results + professional_results))
         logger.info("Tool searches returned %s candidates.", len(candidate_names))
 
         if not candidate_names:
@@ -70,7 +70,7 @@ class ExpertFinderAgent:
                 "professional_candidates": len(professional_results),
                 "total_candidates": 0,
                 "profiles_compared": 0,
-            }, query_parameters
+            }, query_parameters, []
 
         # Compare candidates based on their profiles
         profiles = self.profile_compare.build_profiles(candidate_names)
@@ -79,6 +79,7 @@ class ExpertFinderAgent:
             question,
             profiles,
             self.llm,
+            search_context=query_parameters,
         )
         profile_by_name = {profile["name"]: profile for profile in profiles}
         enriched_experts = []
@@ -93,7 +94,7 @@ class ExpertFinderAgent:
             "professional_candidates": len(professional_results),
             "total_candidates": len(candidate_names),
             "profiles_compared": len(profiles),
-        }, query_parameters
+        }, query_parameters, profiles
 
     def use_search_tool(self, tool: SupportedTool, question: str) -> tuple[list[str], QueryExtraction]:
         tool_args = tool.build_tool_args(question, self.llm)
@@ -105,13 +106,12 @@ class ExpertFinderAgent:
         )
         if tool_args.tool_required:
             filter_column = tool_args.filter_column
-            filter_value = tool_args.filter_value or tool_args.institution
-            if isinstance(tool, EducationSearchTool):
-                filter_column = filter_column or EducationSearchTool.DEFAULT_FILTER_COLUMN
-            if isinstance(tool, WorkExperienceSearchTool):
-                filter_column = filter_column or WorkExperienceSearchTool.DEFAULT_FILTER_COLUMN
-            if not filter_column or not filter_value:
-                return [], tool_args
+            filter_value = tool_args.filter_value
+            if filter_value and not filter_column:
+                if isinstance(tool, EducationSearchTool):
+                    filter_column = EducationSearchTool.DEFAULT_FILTER_COLUMN
+                if isinstance(tool, WorkExperienceSearchTool):
+                    filter_column = WorkExperienceSearchTool.DEFAULT_FILTER_COLUMN
             return tool.search(
                 filter_column=filter_column,
                 filter_value=filter_value,

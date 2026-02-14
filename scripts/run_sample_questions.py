@@ -31,7 +31,7 @@ def main() -> None:
     for i, item in enumerate(questions):
         question = item.get("text", "")
         start_time = time.perf_counter()
-        result, metrics, query_parameters = agent.run_with_metrics(question)
+        result, metrics, query_parameters, profiles = agent.run_with_metrics(question)
         elapsed = time.perf_counter() - start_time
         results.append(
             {
@@ -39,6 +39,7 @@ def main() -> None:
                 "question": question,
                 "result": result.model_dump(),
                 "candidate_metrics": metrics,
+                "profiles": profiles,
                 "query_parameters": query_parameters,
                 "elapsed_seconds": round(elapsed, 3),
             }

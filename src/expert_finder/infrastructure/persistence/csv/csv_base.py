@@ -29,8 +29,8 @@ class CsvRepositoryBase:
     def _search_dataframe(
         self,
         df: pd.DataFrame,
-        filter_column: str,
-        filter_value: str,
+        filter_column: str | None,
+        filter_value: str | None,
         top_k: int,
         min_score: float = 0.0,
         sort_by: str | None = None,
@@ -46,8 +46,6 @@ class CsvRepositoryBase:
 
         results_df = self._sort_results_dataframe(results_df, sort_by=sort_by, sort_order=sort_order)
 
-        results_df = self._sort_results_dataframe(results_df, sort_by=sort_by, sort_order=sort_order)
-
         names: list[str] = []
         rows = results_df.iterrows() if ranking_applied else results_df.head(top_k).iterrows()
         for _, row in rows:
@@ -56,8 +54,18 @@ class CsvRepositoryBase:
                 names.append(name)
         return names
 
-    def _filter_results_dataframe(self, df: pd.DataFrame, filter_column: str, filter_value: str) -> pd.DataFrame:
+    def _filter_results_dataframe(
+        self,
+        df: pd.DataFrame,
+        filter_column: str | None,
+        filter_value: str | None,
+    ) -> pd.DataFrame:
         logger = logging.getLogger(self.__class__.__name__)
+        if not filter_column and not filter_value:
+            return df
+        if not filter_column or not filter_value:
+            logger.warning("Invalid filter arguments: filter_column=%s filter_value=%s", filter_column, filter_value)
+            return df
 
         if filter_column not in df.columns:
             logger.warning("Invalid filter column '%s'. Available columns: %s", filter_column, list(df.columns))

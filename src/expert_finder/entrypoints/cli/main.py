@@ -12,7 +12,6 @@ from expert_finder.domain.tools.profile_compare import ProfileComparisonTool
 from expert_finder.domain.tools.work_experience_search import WorkExperienceSearchTool
 from expert_finder.infrastructure.config import SETTINGS
 from expert_finder.infrastructure.llm.adapters.gpt import GPTLLM
-from expert_finder.infrastructure.llm.adapters.stub import DeterministicStubLLM
 from expert_finder.infrastructure.logging import setup_logging, silence_third_party_loggers
 from expert_finder.infrastructure.persistence.csv.education_repo import CsvEducationRepository
 from expert_finder.infrastructure.persistence.csv.work_experience_repo import CsvWorkExperienceRepository
@@ -51,10 +50,12 @@ def main() -> None:
     agent = build_agent()
     # Re-silence OpenAI/HTTP loggers in case the SDK set DEBUG on import
     silence_third_party_loggers()
-    result = agent.run(args.question)
+    result, _metrics, _query_parameters, profiles = agent.run_with_metrics(args.question)
+    top_10_profiles = profiles[:10]
 
     formatted_results = [{'name': e.name, 'reason': e.reason} for e in result.experts]
-    print(json.dumps({"question": args.question, "result": formatted_results}, indent=2))
+    print(json.dumps({"top_10_profiles": top_10_profiles}, indent=2))
+    print(json.dumps(formatted_results, indent=2))
 
 
     # print(json.dumps({"question": args.question, "result": result.model_dump()}, indent=2))

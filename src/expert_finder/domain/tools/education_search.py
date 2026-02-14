@@ -23,17 +23,20 @@ class EducationSearchTool:
 
     def search(
         self,
-        filter_column: str,
-        filter_value: str,
+        filter_column: str | None = None,
+        filter_value: str | None = None,
         top_k: int = 10,
         min_score: float = 0.0,
         sort_by: str | None = None,
         sort_order: Literal["asc", "desc"] | None = None,
         ranking: dict[str, RankingRule] | None = None,
     ) -> list[str]:
-        normalized_query = normalize_school(filter_value)
+        if not filter_value:
+            normalized_query = None
+        else:
+            normalized_query = normalize_school(filter_value)
         if normalized_query is None:
-            return []
+            normalized_query = filter_value
         return self.education_repo.search(
             filter_column=filter_column,
             filter_value=normalized_query,
@@ -64,18 +67,24 @@ class EducationSearchTool:
               searching by past education (e.g. university attended, degree obtained, academic background).
             - Set tool_required = false if the search should be based only on professional experience
               or current role, and education is not relevant.
-            
+
+            OBJECTIVE RULE:
+            - The objective is to find people who can help the asker reach their target opportunity.
+            - Prioritize the target institution/opportunity context over the asker's background context.
+            - Role disambiguation: treat "quant" as a job role (quantitative researcher), not generic
+              quantitative skills.
+
             FILTER RULES:
             - Allowed columns are: __AVAILABLE_COLUMNS__.
-            - Pick exactly one filter_column and one filter_value when tool_required = true.
+            - Filtering is optional.
+            - Set filter_column and filter_value only when a target institution is explicitly present.
             - Prefer filter_column = "__DEFAULT_FILTER_COLUMN__" unless the user clearly asks for another column.
-            - Prefer using institution whenever available as the filtering parameter.
+            - Strong rule: if the user mentions a school/university/institution, use it as filter_value and set
+              filter_column = "__DEFAULT_FILTER_COLUMN__" unless the user explicitly asks another column.
+            - If multiple institutions are mentioned, choose the one linked to the desired position/interview/
+              application/lab where help is requested, not the one describing the asker's current affiliation.
+            - If no target institution is mentioned, set filter_column = null and filter_value = null.
             - If tool_required = false, set filter_column = null and filter_value = null.
-
-            FIELD EXTRACTION RULES:
-            - institution is a legacy compatibility field.
-            - If tool_required = true and the user mentions a school, set institution to that school.
-            - Otherwise set institution = null.
             
             SORTING RULES:
             - Allowed sortable columns for education are: __AVAILABLE_COLUMNS__.
@@ -91,6 +100,12 @@ class EducationSearchTool:
             - Good ranking candidates include degree type/name and field signals:
               - degree
               - field_of_study
+            - When the user explicitly asks for a specific target profile term, prefer a single dominant ranking
+              signal tied to that target and avoid irrelevant conversational terms.
+            - Do NOT use conversational/support terms as ranking keywords (e.g., "coffee chat", "advice",
+              "help", "chiacchierata").
+            - Do NOT use first-person background details as ranking keywords unless explicitly requested as
+              target criteria.
             - ranking must be a JSON object keyed by column name, with value:
               {"weight": number, "keyword": string}
             - Use only allowed columns as ranking keys.
@@ -108,7 +123,6 @@ class EducationSearchTool:
             
             {
               "tool_required": boolean,
-              "institution": string | null,
               "filter_column": string | null,
               "filter_value": string | null,
               "sort_by": string | null,
