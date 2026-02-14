@@ -46,6 +46,8 @@ class CsvRepositoryBase:
 
         results_df = self._sort_results_dataframe(results_df, sort_by=sort_by, sort_order=sort_order)
 
+        results_df = self._sort_results_dataframe(results_df, sort_by=sort_by, sort_order=sort_order)
+
         names: list[str] = []
         rows = results_df.iterrows() if ranking_applied else results_df.head(top_k).iterrows()
         for _, row in rows:
