@@ -7,22 +7,34 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
+
 class Candidate(BaseModel):
     name: str
     current_title: Optional[str] = None
     institution_records: Optional[list[dict]]
 
 
+class RankingRule(BaseModel):
+    weight: float = Field(..., ge=0.0, description="Non-negative weight for this ranking signal")
+    keyword: str = Field(..., min_length=1, description="Keyword used to score this column")
+
 
 class QueryExtraction(BaseModel):
     tool_required: bool = Field(..., description="Whether a tool should be called")
-    institution: Optional[str] = Field(default=None, description="Target company or school")
-    role: Optional[str] = Field(default=None, description="Target role, if present")
-    topic: Optional[str] = Field(default=None, description="Short topic, if present")
+    institution: Optional[str] = Field(
+        default=None,
+        description="Legacy target company or school field kept for backward compatibility",
+    )
+    filter_column: Optional[str] = Field(default=None, description="Single column name used for filtering")
+    filter_value: Optional[str] = Field(default=None, description="Value used to filter in filter_column")
     sort_by: Optional[str] = Field(default=None, description="Column name to sort by")
     sort_order: Literal["asc", "desc"] | None = Field(
         default=None,
         description="Sort direction. Must be 'asc' or 'desc' when sort_by is set.",
+    )
+    ranking: dict[str, RankingRule] | None = Field(
+        default=None,
+        description="Optional weighted ranking rules keyed by column name",
     )
 
 

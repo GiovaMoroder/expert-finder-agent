@@ -20,7 +20,7 @@ class DeterministicStubLLM(LLMPort):
         payload = self._extract_payload(user_prompt)
 
         if schema_name == "QueryExtraction":
-            return json.dumps(self._extract_query(user_prompt))
+            return json.dumps(self._extract_query(system_prompt, user_prompt))
         if schema_name == "ShortlistResult":
             return json.dumps(self._shortlist(payload))
         if schema_name == "FinalResult":
@@ -42,17 +42,17 @@ class DeterministicStubLLM(LLMPort):
         return json.loads(payload_str)
 
     @staticmethod
-    def _extract_query(question: str) -> dict[str, Any]:
+    def _extract_query(system_prompt: str, question: str) -> dict[str, Any]:
         text = question.strip()
         institution = DeterministicStubLLM._find_institution(text) or "Unknown"
-        role = DeterministicStubLLM._find_role(text)
-        topic = DeterministicStubLLM._find_topic(text)
         tool_required = institution != "Unknown"
+        default_filter_column = "company" if "professional experience" in system_prompt.lower() else "institution"
         return {
             "tool_required": tool_required,
             "institution": institution if tool_required else None,
-            "role": role,
-            "topic": topic,
+            "filter_column": default_filter_column if tool_required else None,
+            "filter_value": institution if tool_required else None,
+            "ranking": None,
             "sort_by": None,
             "sort_order": None,
         }
@@ -70,23 +70,6 @@ class DeterministicStubLLM(LLMPort):
                 institution = match.group(1).strip().rstrip("?.,")
                 institution = re.split(r"\s+in\s+role\s+|\s+as\s+|\s+with\s+", institution, maxsplit=1)[0]
                 return institution.strip()
-        return None
-
-    @staticmethod
-    def _find_role(text: str) -> str | None:
-        match = re.search(r"role\s+([A-Za-z][\w /&\-]+)", text, re.IGNORECASE)
-        if match:
-            return match.group(1).strip().rstrip("?.,")
-        match = re.search(r"as\s+([A-Za-z][\w /&\-]+)\s+at", text, re.IGNORECASE)
-        if match:
-            return match.group(1).strip().rstrip("?.,")
-        return None
-
-    @staticmethod
-    def _find_topic(text: str) -> str | None:
-        match = re.search(r"on\s+([A-Za-z][\w /&\-]+)", text, re.IGNORECASE)
-        if match:
-            return match.group(1).strip().rstrip("?.,")
         return None
 
     @staticmethod

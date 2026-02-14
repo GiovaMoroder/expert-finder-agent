@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Iterable
 from typing import Literal
 
-from expert_finder.domain.models import EducationRecord, WorkExperienceRecord
+from expert_finder.domain.models import EducationRecord, RankingRule, WorkExperienceRecord
 
 
 class WorkExperienceRepository(ABC):
@@ -19,11 +19,13 @@ class WorkExperienceRepository(ABC):
     @abstractmethod
     def search(
         self,
-        query: str,
+        filter_column: str,
+        filter_value: str,
         top_k: int = 10,
         min_score: float = 0.0,
         sort_by: str | None = None,
         sort_order: Literal["asc", "desc"] | None = None,
+        ranking: dict[str, RankingRule] | None = None,
     ) -> list[str]:
         raise NotImplementedError
 
@@ -40,10 +42,12 @@ class EducationRepository(ABC):
     @abstractmethod
     def search(
         self,
-        query: str,
+        filter_column: str,
+        filter_value: str,
         top_k: int = 10,
         min_score: float = 0.0,
         sort_by: str | None = None,
         sort_order: Literal["asc", "desc"] | None = None,
+        ranking: dict[str, RankingRule] | None = None,
     ) -> list[str]:
         raise NotImplementedError

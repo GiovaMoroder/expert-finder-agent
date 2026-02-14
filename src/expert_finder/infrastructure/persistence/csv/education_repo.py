@@ -7,7 +7,7 @@ from typing import Literal
 import pandas as pd
 
 from expert_finder.infrastructure.persistence.csv.csv_base import CsvRepositoryBase
-from expert_finder.domain.models import EducationRecord
+from expert_finder.domain.models import EducationRecord, RankingRule
 from expert_finder.domain.ports import EducationRepository
 from expert_finder.infrastructure.path import EDUCATION_CSV
 
@@ -55,20 +55,22 @@ class CsvEducationRepository(CsvRepositoryBase, EducationRepository):
 
     def search(
         self,
-        query: str,
+        filter_column: str,
+        filter_value: str,
         top_k: int = 10,
         min_score: float = 0.0,
         sort_by: str | None = None,
         sort_order: Literal["asc", "desc"] | None = None,
+        ranking: dict[str, RankingRule] | None = None,
     ) -> list[str]:
         df = self._load()
-        self._apply_norm_columns(df, self.SEARCH_COLUMNS)
         return self._search_dataframe(
             df,
-            query,
-            self.SEARCH_COLUMNS,
-            top_k,
-            min_score,
+            filter_column=filter_column,
+            filter_value=filter_value,
+            top_k=top_k,
+            min_score=min_score,
             sort_by=sort_by,
             sort_order=sort_order,
+            ranking=ranking,
         )
