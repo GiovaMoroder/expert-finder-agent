@@ -50,10 +50,10 @@ def main() -> None:
     agent = build_agent()
     # Re-silence OpenAI/HTTP loggers in case the SDK set DEBUG on import
     silence_third_party_loggers()
-    result, _metrics, _query_parameters, profiles = agent.run_with_metrics(args.question)
-    top_10_profiles = profiles[:10]
+    run_output = agent.run_with_metrics(args.question)
+    top_10_profiles = run_output.profiles[:10]
 
-    formatted_results = [{'name': e.name, 'reason': e.reason} for e in result.experts]
+    formatted_results = [{"name": e.name, "reason": e.reason} for e in run_output.result.experts]
     print(json.dumps({"top_10_profiles": top_10_profiles}, indent=2))
     print(json.dumps(formatted_results, indent=2))
 

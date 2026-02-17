@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import json
 import logging
-import pprint
+from dataclasses import dataclass
 from typing import TypeAlias
 from typing import Any
 
@@ -15,6 +14,14 @@ from expert_finder.domain.tools.work_experience_search import WorkExperienceSear
 from expert_finder.domain.models import FinalResult, QueryExtraction
 
 SupportedTool: TypeAlias = EducationSearchTool | WorkExperienceSearchTool
+
+
+@dataclass(frozen=True, slots=True)
+class ExpertFinderRunOutput:
+    result: FinalResult
+    metrics: dict[str, int]
+    query_parameters: dict[str, dict[str, Any]]
+    profiles: list[dict[str, Any]]
 
 
 class ExpertFinderAgent:
@@ -31,12 +38,11 @@ class ExpertFinderAgent:
         self.profile_compare = profile_compare
 
     def run(self, question: str) -> FinalResult:
-        result, _, _, _ = self.run_with_metrics(question)
-        return result
+        return self.run_with_metrics(question).result
 
     def run_with_metrics(
         self, question: str
-    ) -> tuple[FinalResult, dict[str, int], dict[str, dict[str, Any]], list[dict[str, Any]]]:
+    ) -> ExpertFinderRunOutput:
         logger = logging.getLogger(self.__class__.__name__)
         logger.info("Starting expert finder run.")
         logger.debug("Question: %s", question)
@@ -65,12 +71,17 @@ class ExpertFinderAgent:
         logger.info("Tool searches returned %s candidates.", len(candidate_names))
 
         if not candidate_names:
-            return FinalResult(experts=[]), {
-                "education_candidates": len(edu_results),
-                "professional_candidates": len(professional_results),
-                "total_candidates": 0,
-                "profiles_compared": 0,
-            }, query_parameters, []
+            return ExpertFinderRunOutput(
+                result=FinalResult(experts=[]),
+                metrics={
+                    "education_candidates": len(edu_results),
+                    "professional_candidates": len(professional_results),
+                    "total_candidates": 0,
+                    "profiles_compared": 0,
+                },
+                query_parameters=query_parameters,
+                profiles=[],
+            )
 
         # Compare candidates based on their profiles
         profiles = self.profile_compare.build_profiles(candidate_names)
@@ -89,12 +100,17 @@ class ExpertFinderAgent:
             )
         result = result.model_copy(update={"experts": enriched_experts})
         logger.info("Expert finder run completed with %s experts.", len(result.experts))
-        return result, {
-            "education_candidates": len(edu_results),
-            "professional_candidates": len(professional_results),
-            "total_candidates": len(candidate_names),
-            "profiles_compared": len(profiles),
-        }, query_parameters, profiles
+        return ExpertFinderRunOutput(
+            result=result,
+            metrics={
+                "education_candidates": len(edu_results),
+                "professional_candidates": len(professional_results),
+                "total_candidates": len(candidate_names),
+                "profiles_compared": len(profiles),
+            },
+            query_parameters=query_parameters,
+            profiles=profiles,
+        )
 
     def use_search_tool(self, tool: SupportedTool, question: str) -> tuple[list[str], QueryExtraction]:
         tool_args = tool.build_tool_args(question, self.llm)
