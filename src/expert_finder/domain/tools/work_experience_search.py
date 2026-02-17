@@ -43,7 +43,7 @@ class WorkExperienceSearchTool:
     def build_tool_args(self, question: str, llm: LLMPort) -> QueryExtraction:
         """Build tool arguments from the question for professional search."""
 
-        system_prompt = (
+        system_prompt_template = (
             """
             You are an information extraction assistant.
 
@@ -67,19 +67,19 @@ class WorkExperienceSearchTool:
               quantitative skills.
 
             FILTER RULES:
-            - Allowed columns are: __AVAILABLE_COLUMNS__.
+            - Allowed columns are: {available_columns}.
             - Filtering is optional.
             - Set filter_column and filter_value only when a target institution/company is explicitly present.
-            - Prefer filter_column = "__DEFAULT_FILTER_COLUMN__" unless the user clearly asks for another column.
+            - Prefer filter_column = "{default_filter_column}" unless the user clearly asks for another column.
             - Strong rule: if the user mentions an institution/company/organization, use it as filter_value and set
-              filter_column = "__DEFAULT_FILTER_COLUMN__" unless the user explicitly asks another column.
+              filter_column = "{default_filter_column}" unless the user explicitly asks another column.
             - If multiple institutions are mentioned, choose the one linked to the desired position/interview/
               application/lab where help is requested, not the one describing the asker's current affiliation.
             - If no target institution/company is mentioned, set filter_column = null and filter_value = null.
             - If tool_required = false, set filter_column = null and filter_value = null.
 
             SORTING RULES:
-            - Allowed sortable columns for work experience are: __AVAILABLE_COLUMNS__.
+            - Allowed sortable columns for work experience are: {available_columns}.
             - Infer sorting from context, even when user does not explicitly say "sort by".
             - If the user asks for recency/current/latest/recently, set sort_by = "start_date" and sort_order = "desc".
             - If the user asks for oldest/earliest/first, set sort_by = "start_date" and sort_order = "asc".
@@ -101,34 +101,36 @@ class WorkExperienceSearchTool:
             - Do NOT use first-person background details as ranking keywords unless explicitly requested as
               target criteria
             - ranking must be a JSON object keyed by column name, with value:
-              {"weight": number, "keyword": string}
+              {{"weight": number, "keyword": string}}
             - Use only allowed columns as ranking keys.
             - Weights are non-negative and will be normalized later.
             - Example:
-              {
-                "role": {"weight": 0.7, "keyword": "research engineer"},
-                "description": {"weight": 0.3, "keyword": "LLM"}
-              }
+              {{
+                "role": {{"weight": 0.7, "keyword": "research engineer"}},
+                "description": {{"weight": 0.3, "keyword": "LLM"}}
+              }}
 
             OUTPUT CONSTRAINTS:
             - Return ONLY valid JSON.
             - Do NOT include explanations, comments, or extra text.
             - Use exactly the following schema:
 
-            {
+            {{
               "tool_required": boolean,
               "filter_column": string | null,
               "filter_value": string | null,
               "sort_by": string | null,
               "sort_order": "asc" | "desc" | null,
-              "ranking": { "<column_name>": { "weight": number, "keyword": string } } | null
-            }
+              "ranking": {{ "<column_name>": {{ "weight": number, "keyword": string }} }} | null
+            }}
 
             Schema: QueryExtraction
             """
         )
-        system_prompt = system_prompt.replace("__AVAILABLE_COLUMNS__", ", ".join(self.AVAILABLE_COLUMNS))
-        system_prompt = system_prompt.replace("__DEFAULT_FILTER_COLUMN__", self.DEFAULT_FILTER_COLUMN)
+        system_prompt = system_prompt_template.format(
+            available_columns=", ".join(self.AVAILABLE_COLUMNS),
+            default_filter_column=self.DEFAULT_FILTER_COLUMN,
+        )
         user_prompt = question
         extraction = llm.call_json(QueryExtraction, system_prompt, user_prompt)
         return extraction
