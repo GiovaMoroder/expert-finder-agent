@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Expert Finder</title>
+  <link rel="stylesheet" href="/static/app.css" />
+</head>
+<body class="qa-body">
+  <main class="qa-container">
+    <div class="topbar">
+      <h1 class="title">Expert Finder QA</h1>
+      <div>
+        <span class="user">Logged in as: <strong>{{ username }}</strong></span>
+        <button id="logout" type="button">Logout</button>
+      </div>
+    </div>
+    <form id="ask-form">
+      <textarea id="question" name="question" placeholder="Type your question..." required></textarea>
+      <div class="buttons">
+        <button type="submit">Ask</button>
+      </div>
+      <p id="error" class="error"></p>
+    </form>
+    <pre id="output">Ask a question to see the JSON payload returned by the agent.</pre>
+  </main>
+  <script src="/static/qa.js"></script>
+</body>
+</html>
+
