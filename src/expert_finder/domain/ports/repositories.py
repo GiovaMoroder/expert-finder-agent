@@ -1,10 +1,16 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from datetime import datetime
 from typing import Iterable
 from typing import Literal
 
-from expert_finder.domain.models import EducationRecord, RankingRule, WorkExperienceRecord
+from expert_finder.domain.models import (
+    EducationRecord,
+    QuestionLogEntry,
+    RankingRule,
+    WorkExperienceRecord,
+)
 
 
 class WorkExperienceRepository(ABC):
@@ -50,4 +56,22 @@ class EducationRepository(ABC):
         sort_order: Literal["asc", "desc"] | None = None,
         ranking: dict[str, RankingRule] | None = None,
     ) -> list[str]:
+        raise NotImplementedError
+
+
+class QuestionLogRepository(ABC):
+    @abstractmethod
+    def append(self, entry: QuestionLogEntry) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def list(
+        self,
+        *,
+        since: datetime | None = None,
+        until: datetime | None = None,
+        username: str | None = None,
+        limit: int = 200,
+        newest_first: bool = True,
+    ) -> list[QuestionLogEntry]:
         raise NotImplementedError
