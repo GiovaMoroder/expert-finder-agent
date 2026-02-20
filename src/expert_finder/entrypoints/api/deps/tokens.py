@@ -6,29 +6,45 @@ from datetime import datetime, timedelta, timezone
 
 from jose import JWTError, jwt
 
+from expert_finder.config.settings import ApiSettings
 from expert_finder.config.settings import get_api_settings
 
 OAUTH2_ALGORITHM = "HS256"
 
 
-def _oauth2_secret_key() -> str:
-    return get_api_settings().oauth2_secret_key
+def create_access_token_with_settings(*, username: str, settings: ApiSettings) -> str:
+    expire_at = datetime.now(timezone.utc) + timedelta(minutes=settings.access_token_expire_minutes)
+    payload = {"sub": username, "exp": expire_at}
+    return jwt.encode(payload, settings.oauth2_secret_key, algorithm=OAUTH2_ALGORITHM)
+
+
+def issue_access_token(*, username: str, settings: ApiSettings) -> str:
+    return create_access_token_with_settings(username=username, settings=settings)
 
 
 def create_access_token(*, username: str) -> str:
-    expires_minutes = get_api_settings().access_token_expire_minutes
-    expire_at = datetime.now(timezone.utc) + timedelta(minutes=expires_minutes)
-    payload = {"sub": username, "exp": expire_at}
-    return jwt.encode(payload, _oauth2_secret_key(), algorithm=OAUTH2_ALGORITHM)
+    return create_access_token_with_settings(username=username, settings=get_api_settings())
 
 
-def decode_access_token(token: str) -> dict:
+def decode_access_token_with_settings(token: str, settings: ApiSettings) -> dict:
     """
     Decode/validate a token and return the JWT payload.
 
     Raises jose.JWTError on failure.
     """
-    return jwt.decode(token, _oauth2_secret_key(), algorithms=[OAUTH2_ALGORITHM])
+    return jwt.decode(token, settings.oauth2_secret_key, algorithms=[OAUTH2_ALGORITHM])
 
 
-__all__ = ["JWTError", "OAUTH2_ALGORITHM", "create_access_token", "decode_access_token"]
+def decode_access_token(token: str) -> dict:
+    return decode_access_token_with_settings(token, get_api_settings())
+
+
+__all__ = [
+    "JWTError",
+    "OAUTH2_ALGORITHM",
+    "create_access_token",
+    "create_access_token_with_settings",
+    "decode_access_token",
+    "decode_access_token_with_settings",
+    "issue_access_token",
+]
