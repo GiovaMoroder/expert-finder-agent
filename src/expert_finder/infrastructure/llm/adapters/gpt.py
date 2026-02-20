@@ -15,9 +15,11 @@ class GPTLLM(LLMPort):
     def __init__(
         self,
         model: str,
+        temperature: float,
         secret_getter: SecretGetter = inf_get_secret,
     ) -> None:
         self.model = model
+        self.temperature = temperature
         self.secret_getter = secret_getter
         api_key = self.secret_getter("OPENAI_KEY")
         self._client = OpenAI(api_key=api_key)
@@ -29,6 +31,7 @@ class GPTLLM(LLMPort):
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
+            temperature=self.temperature,
         )
 
         if response.choices and len(response.choices) > 0:

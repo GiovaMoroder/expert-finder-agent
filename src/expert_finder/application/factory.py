@@ -22,12 +22,16 @@ def build_agent(
     """Construct the default Expert Finder agent."""
     logger = logging.getLogger(__name__)
     settings = settings_provider()
-    logger.info("Building ExpertFinderAgent with model=%s", settings.gpt_model)
+    logger.info(
+        "Building ExpertFinderAgent with model=%s temperature=%.2f",
+        settings.gpt_model,
+        settings.llm_temperature,
+    )
 
     education_search = EducationSearchTool(education_repo=CsvEducationRepository())
     professional_search = WorkExperienceSearchTool(work_repo=CsvWorkExperienceRepository())
 
-    llm = GPTLLM(model=settings.gpt_model)
+    llm = GPTLLM(model=settings.gpt_model, temperature=settings.llm_temperature)
     return ExpertFinderAgent(
         llm=llm,
         education_search=education_search,
