@@ -13,6 +13,13 @@ data/expert_finder.sqlite3
 data/raw/*
 data/processed/*
 
+#vs code
+extensions.json
+
+#random scripts
+scripts/shell_scripts/*
+scripts/count_university_instances.py
+
 # deployment-related
 .dockerignore
 Caddyfile
