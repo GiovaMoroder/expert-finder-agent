@@ -15,6 +15,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class SupportedModel(str, Enum):
     GPT_4O_MINI = "gpt-4o-mini"
     GPT_4O = "gpt-4o"
+    GPT_5_2 = "gpt-5.2"
 
 
 class ApiSettings(BaseSettings):
@@ -54,6 +55,7 @@ class InfisicalSettings(BaseSettings):
     user: str = Field(alias="INFISICAL_USER")
     key: str = Field(alias="INFISICAL_KEY")
     project_id: str = Field(alias="INFISICAL_PROJECT_ID")
+    environment_slug: str = Field(default="staging", alias="INFISICAL_ENVIRONMENT")
     host: str = Field(default="https://app.infisical.com", alias="INFISICAL_HOST")
 
 
