@@ -66,7 +66,7 @@ class EducationSearchTool:
             - Set tool_required = true if the user’s request explicitly or implicitly requires
               searching by past education (e.g. university attended, degree obtained, academic background).
             - Set tool_required = false if the search should be based only on professional experience
-              or current role, and education is not relevant.
+              or current role, and education is not relevant. Any search or ranking should use "quantitative researcher" as the role, not "quant" alone.
 
             OBJECTIVE RULE:
             - The objective is to find people who can help the asker reach their target opportunity.
