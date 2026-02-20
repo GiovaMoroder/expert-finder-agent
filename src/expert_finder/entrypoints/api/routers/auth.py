@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Response
 from fastapi.security import OAuth2PasswordRequestForm
 
 from expert_finder.entrypoints.api.deps import create_access_token, validate_login_credentials
+from expert_finder.config.settings import get_api_settings
 
 
 router = APIRouter(tags=["core"])
@@ -27,7 +28,7 @@ def token(response: Response, form_data: OAuth2PasswordRequestForm = Depends()) 
     response.set_cookie(
         key="access_token",
         value=access_token,
-        secure=True,
+        secure=get_api_settings().cookie_secure,
         httponly=True,
         samesite="lax",
     )

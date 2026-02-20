@@ -2,23 +2,21 @@
 
 from __future__ import annotations
 
-import os
 from datetime import datetime, timedelta, timezone
 
 from jose import JWTError, jwt
+
+from expert_finder.config.settings import get_api_settings
 
 OAUTH2_ALGORITHM = "HS256"
 
 
 def _oauth2_secret_key() -> str:
-    secret = os.environ.get("OAUTH2_SECRET_KEY")
-    if not isinstance(secret, str) or not secret.strip():
-        raise RuntimeError("OAUTH2_SECRET_KEY environment variable is not set")
-    return secret
+    return get_api_settings().oauth2_secret_key
 
 
 def create_access_token(*, username: str) -> str:
-    expires_minutes = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES"))
+    expires_minutes = get_api_settings().access_token_expire_minutes
     expire_at = datetime.now(timezone.utc) + timedelta(minutes=expires_minutes)
     payload = {"sub": username, "exp": expire_at}
     return jwt.encode(payload, _oauth2_secret_key(), algorithm=OAUTH2_ALGORITHM)

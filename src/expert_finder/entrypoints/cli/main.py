@@ -17,7 +17,7 @@ from expert_finder.domain.agents.expert_finder import ExpertFinderRunOutput
 from expert_finder.domain.tools.education_search import EducationSearchTool
 from expert_finder.domain.tools.profile_compare import ProfileComparisonTool
 from expert_finder.domain.tools.work_experience_search import WorkExperienceSearchTool
-from expert_finder.infrastructure.config import SETTINGS
+from expert_finder.config.settings import get_agent_settings
 from expert_finder.infrastructure.llm.adapters.gpt import GPTLLM
 from expert_finder.infrastructure.logging import setup_logging, silence_third_party_loggers
 from expert_finder.infrastructure.persistence.csv.education_repo import CsvEducationRepository
@@ -155,7 +155,7 @@ def cli(
             help="LLM model name.",
             show_default=True,
         ),
-    ] = SETTINGS.gpt_model,
+    ] = get_agent_settings().gpt_model,
     output: Annotated[
         OutputFormat,
         typer.Option(

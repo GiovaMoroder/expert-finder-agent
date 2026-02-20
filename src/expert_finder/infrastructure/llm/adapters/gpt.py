@@ -6,7 +6,7 @@ import os
 
 from openai import OpenAI
 
-from expert_finder.infrastructure.settings.inf import get_secret as inf_get_secret
+from expert_finder.config.secrets import get_secret as inf_get_secret
 from expert_finder.domain.ports import LLMPort, SecretGetter
 
 

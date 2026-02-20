@@ -2,25 +2,33 @@
 
 from __future__ import annotations
 
-import os
-
+from expert_finder.config.settings import AgentSettingsProvider
+from expert_finder.config.settings import get_agent_settings
 from expert_finder.domain.agents.expert_finder import ExpertFinderAgent
 from expert_finder.domain.tools.education_search import EducationSearchTool
 from expert_finder.domain.tools.profile_compare import ProfileComparisonTool
 from expert_finder.domain.tools.work_experience_search import WorkExperienceSearchTool
-from expert_finder.infrastructure.config import SETTINGS
-from expert_finder.infrastructure.llm.adapters.gpt import GPTLLM
 from expert_finder.infrastructure.llm.adapters.stub import DeterministicStubLLM
 from expert_finder.infrastructure.persistence.csv.education_repo import CsvEducationRepository
 from expert_finder.infrastructure.persistence.csv.work_experience_repo import CsvWorkExperienceRepository
 
 
-def build_agent() -> ExpertFinderAgent:
+def build_agent(
+    *,
+    settings_provider: AgentSettingsProvider = get_agent_settings,
+    use_stub_llm: bool = False,
+) -> ExpertFinderAgent:
     """Construct the default Expert Finder agent."""
+    settings = settings_provider()
+
     education_search = EducationSearchTool(education_repo=CsvEducationRepository())
     professional_search = WorkExperienceSearchTool(work_repo=CsvWorkExperienceRepository())
-    use_stub = os.environ.get("EXPERT_FINDER_USE_STUB_LLM", "").lower() in {"1", "true", "yes"}
-    llm = DeterministicStubLLM() if use_stub else GPTLLM(model=SETTINGS.gpt_model)
+    if use_stub_llm:
+        llm = DeterministicStubLLM()
+    else:
+        from expert_finder.infrastructure.llm.adapters.gpt import GPTLLM
+
+        llm = GPTLLM(model=settings.gpt_model)
     return ExpertFinderAgent(
         llm=llm,
         education_search=education_search,
@@ -30,4 +38,3 @@ def build_agent() -> ExpertFinderAgent:
             professional_search=professional_search,
         ),
     )
-

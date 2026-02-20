@@ -1,19 +1,15 @@
-"""Configuration for the Expert Finder POC."""
+"""Compatibility wrapper for agent settings."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 
+from expert_finder.config.settings import get_agent_settings
 
-@dataclass(frozen=True)
+
+@dataclass(frozen=True, slots=True)
 class Settings:
-    """Application settings.
-
-    In production, these would be loaded from env vars or a config file.
-    """
-
-    # TODO: flag here if we want to use different LLMs
-    gpt_model: str = "gpt-4o-mini"
+    gpt_model: str
 
 
-SETTINGS = Settings()
+SETTINGS = Settings(gpt_model=get_agent_settings().gpt_model)
