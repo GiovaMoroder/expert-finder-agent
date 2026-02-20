@@ -7,13 +7,15 @@ from expert_finder.infrastructure.path import PROCESSED_WORK_EXPERIENCES_CSV, RA
 
 RAW_COLUMNS = [
     "full_name",
+    "current_location",
+    "linkedin_url",
     "title",
     "company",
     "starts_at",
     "ends_at",
     "start_date",
     "end_date",
-    "location",
+    "experience_location",
     "description",
 ]
 
@@ -44,9 +46,12 @@ def main() -> None:
     processed = pd.DataFrame(
         {
             "full_name": _series_or_none(df, "full_name"),
+            "current_location": _series_or_none(df, "current_location"),
+            "linkedin_url": _series_or_none(df, "linkedin_url"),
             "company": _series_or_none(df, "company"),
             "role": _series_or_none(df, "title"),
-            "location": _series_or_none(df, "location"),
+            "experience_location": _series_or_none(df, "experience_location")
+            .fillna(_series_or_none(df, "location")),
             "start_date": start_dates,
             "end_date": end_dates,
             "description": _series_or_none(df, "description"),

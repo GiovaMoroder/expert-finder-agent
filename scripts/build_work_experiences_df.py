@@ -22,13 +22,15 @@ def main() -> None:
             all_professional_activities.append(
                 {
                     "full_name": profile.get("full_name"),
+                    "current_location": profile.get("city"),
+                    "linkedin_url": profile.get("linkedin_url"),
                     "title": e.get("title"),
                     "company": e.get("company"),
                     "starts_at": e.get("starts_at"),
                     "ends_at": e.get("ends_at"),
                     "start_date": start_date,
                     "end_date": end_date,
-                    "location": e.get("location"),
+                    "experience_location": e.get("location"),
                     "description": e.get("description"),
                 }
             )

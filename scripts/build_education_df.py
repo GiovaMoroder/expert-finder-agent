@@ -22,6 +22,8 @@ def main() -> None:
             all_educations.append(
                 {
                     "full_name": profile.get("full_name"),
+                    "current_location": profile.get("city"),
+                    "linkedin_url": profile.get("linkedin_url"),
                     "degree": e.get("degree"),
                     "degree_name": e.get("degree_name"),
                     "field_of_study": e.get("field_of_study"),

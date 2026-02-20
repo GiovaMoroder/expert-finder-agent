@@ -64,7 +64,7 @@ class WorkExperienceSearchTool:
             - The objective is to find people who can help the asker reach their target opportunity.
             - Prioritize the target institution/opportunity context over the asker's background context.
             - Role disambiguation: treat "quant" as a job role (quantitative researcher), not generic
-              quantitative skills. Any search or ranking should use "quantitative researcher" as the role, not "quant" alone.
+              quantitative skills. Never use "quant" in search or ranking, use "quantitative researcher" instead.
 
             FILTER RULES:
             - Allowed columns are: {available_columns}.

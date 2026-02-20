@@ -24,6 +24,8 @@ class CsvEducationRepository(CsvRepositoryBase, EducationRepository):
             yield EducationRecord(
                 full_name=row.get("full_name"),
                 institution=row.get("institution"),
+                current_location=row.get("current_location"),
+                linkedin_url=row.get("linkedin_url"),
                 degree=row.get("degree"),
                 field_of_study=row.get("field_of_study"),
                 start_date=row.get("start_date"),
@@ -44,6 +46,8 @@ class CsvEducationRepository(CsvRepositoryBase, EducationRepository):
                 EducationRecord(
                     full_name=row.get("full_name"),
                     institution=row.get("institution"),
+                    current_location=row.get("current_location"),
+                    linkedin_url=row.get("linkedin_url"),
                     degree=row.get("degree"),
                     field_of_study=row.get("field_of_study"),
                     start_date=row.get("start_date"),
