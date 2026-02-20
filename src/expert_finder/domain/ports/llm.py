@@ -11,7 +11,7 @@ from typing import Type
 
 from pydantic import BaseModel
 
-SecretGetter = Callable[[str, str], str]
+SecretGetter = Callable[[str], str]
 
 
 class LLMPort(ABC):
@@ -27,9 +27,7 @@ class LLMPort(ABC):
     def call_json(self, schema: Type[BaseModel], system_prompt: str, user_prompt: str) -> BaseModel:
         """Call the LLM and validate the JSON response using Pydantic."""
         logger = logging.getLogger(self.__class__.__name__)
-        # if logger.isEnabledFor(logging.DEBUG):
-        #     logger.debug("System prompt:\n%s", system_prompt)
-        #     logger.debug("User prompt:\n%s", user_prompt)
+        
         raw = self.complete(system_prompt, user_prompt)
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("Raw LLM response:\n%s", raw)

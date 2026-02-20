@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import os
-
 from openai import OpenAI
 
 from expert_finder.config.secrets import get_secret as inf_get_secret
@@ -14,16 +12,18 @@ class GPTLLM(LLMPort):
     """Adapter for a GPT-style API.
     """
 
-    def __init__(self, model: str, secret_getter: SecretGetter = inf_get_secret) -> None:
+    def __init__(
+        self,
+        model: str,
+        secret_getter: SecretGetter = inf_get_secret,
+    ) -> None:
         self.model = model
         self.secret_getter = secret_getter
+        api_key = self.secret_getter("OPENAI_KEY")
+        self._client = OpenAI(api_key=api_key)
 
     def complete(self, system_prompt: str, user_prompt: str) -> str:
-        env = os.environ.get("ENVIRONMENT", "staging")
-        api_key = self.secret_getter("OPENAI_KEY", env)
-        client = OpenAI(api_key=api_key)
-
-        response = client.chat.completions.create(
+        response = self._client.chat.completions.create(
             model=self.model,
             messages=[
                 {"role": "system", "content": system_prompt},

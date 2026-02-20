@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+
 from expert_finder.config.settings import AgentSettingsProvider
 from expert_finder.config.settings import get_agent_settings
 from expert_finder.domain.agents.expert_finder import ExpertFinderAgent
@@ -18,7 +20,9 @@ def build_agent(
     settings_provider: AgentSettingsProvider = get_agent_settings,
 ) -> ExpertFinderAgent:
     """Construct the default Expert Finder agent."""
+    logger = logging.getLogger(__name__)
     settings = settings_provider()
+    logger.info("Building ExpertFinderAgent with model=%s", settings.gpt_model)
 
     education_search = EducationSearchTool(education_repo=CsvEducationRepository())
     professional_search = WorkExperienceSearchTool(work_repo=CsvWorkExperienceRepository())
