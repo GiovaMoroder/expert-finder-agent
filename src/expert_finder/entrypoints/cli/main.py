@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import json
+import time
 from enum import Enum
+from pathlib import Path
+from collections.abc import Callable
 from typing import Annotated
 from typing import Any
 
@@ -11,14 +14,14 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from expert_finder.application.factory import build_agent
+from expert_finder.application.deps import build_agent
 from expert_finder.config.settings import AgentSettings
-from expert_finder.config.settings import AgentSettingsProvider
 from expert_finder.domain.agents.expert_finder import ExpertFinderAgent
 from expert_finder.domain.agents.expert_finder import ExpertFinderRunOutput
 from expert_finder.config.settings import get_agent_settings
 from expert_finder.config.settings import SupportedModel
 from expert_finder.infrastructure.logging import setup_logging, silence_third_party_loggers
+from expert_finder.infrastructure.path import SAMPLE_REQUESTS_JSON, SAMPLE_REQUESTS_RESULTS_JSON
 
 app = typer.Typer(
     add_completion=True,
@@ -77,7 +80,7 @@ def _emit_json_compat(run_output: ExpertFinderRunOutput, *, profiles_limit: int)
     typer.echo(json.dumps(formatted_experts, indent=2))
 
 
-def _cli_settings_provider(*, model: SupportedModel | None) -> AgentSettingsProvider:
+def _cli_settings_provider(*, model: SupportedModel | None) -> Callable[[], AgentSettings]:
     base_settings = get_agent_settings()
     overrides: dict[str, object] = {}
     if model is not None:
@@ -205,6 +208,92 @@ def cli(
         show_metrics=show_metrics,
         show_context=show_context,
     )
+
+
+@app.command("run-samples")
+def run_samples(
+    input_file: Annotated[
+        Path,
+        typer.Option(
+            "--input-file",
+            help="JSON file with sample questions.",
+            show_default=True,
+        ),
+    ] = SAMPLE_REQUESTS_JSON,
+    output_file: Annotated[
+        Path,
+        typer.Option(
+            "--output-file",
+            help="Where to write run results JSON.",
+            show_default=True,
+        ),
+    ] = SAMPLE_REQUESTS_RESULTS_JSON,
+    model: Annotated[
+        SupportedModel | None,
+        typer.Option(
+            "--model",
+            envvar="LLM_MODEL",
+            help="LLM model override.",
+            show_default=False,
+        ),
+    ] = None,
+    log_level: Annotated[
+        str,
+        typer.Option(
+            "--log-level",
+            envvar="LOG_LEVEL",
+            help="Logging level (e.g., DEBUG, INFO, WARNING).",
+            show_default=True,
+        ),
+    ] = "INFO",
+    limit: Annotated[
+        int | None,
+        typer.Option(
+            "--limit",
+            min=1,
+            help="Run only the first N sample questions.",
+            show_default=False,
+        ),
+    ] = None,
+) -> None:
+    setup_logging(log_level)
+    agent = build_agent(settings_provider=_cli_settings_provider(model=model))
+    silence_third_party_loggers()
+
+    payload = json.loads(input_file.read_text(encoding="utf-8"))
+    if not isinstance(payload, list):
+        raise typer.BadParameter("Sample input must be a JSON array.", param_hint="--input-file")
+    questions: list[dict[str, Any]] = payload
+    if limit is not None:
+        questions = questions[:limit]
+
+    results: list[dict[str, Any]] = []
+    total = len(questions)
+    for idx, item in enumerate(questions, start=1):
+        question = str(item.get("text", ""))
+        start_time = time.perf_counter()
+        run_output = agent.run_with_metrics(question)
+        elapsed = time.perf_counter() - start_time
+
+        results.append(
+            {
+                "id": item.get("id"),
+                "question": question,
+                "result": run_output.result.model_dump(mode="json"),
+                "candidate_metrics": run_output.metrics,
+                "profiles": run_output.profiles,
+                "query_parameters": run_output.query_parameters,
+                "elapsed_seconds": round(elapsed, 3),
+            }
+        )
+        typer.echo(f"Processed question {idx}/{total} in {elapsed:.2f}s")
+
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    output_file.write_text(
+        json.dumps(results, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    typer.echo(f"Wrote {output_file} with {len(results)} results")
 
 
 def main() -> None:

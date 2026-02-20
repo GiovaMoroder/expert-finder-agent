@@ -60,11 +60,6 @@ class InfisicalSettings(BaseSettings):
     host: str = Field(default="https://app.infisical.com", alias="INFISICAL_HOST")
 
 
-ApiSettingsProvider = Callable[[], ApiSettings]
-AgentSettingsProvider = Callable[[], AgentSettings]
-InfisicalSettingsProvider = Callable[[], InfisicalSettings]
-
-
 @lru_cache(maxsize=1)
 def get_api_settings() -> ApiSettings:
     return ApiSettings()
