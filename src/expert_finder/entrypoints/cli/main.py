@@ -129,7 +129,6 @@ def _run(
 
 @app.callback(invoke_without_command=True)
 def cli(
-    ctx: typer.Context,
     question: Annotated[
         str | None,
         typer.Argument(

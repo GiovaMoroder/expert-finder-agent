@@ -34,15 +34,3 @@ class GPTLLM(LLMPort):
         if response.choices and len(response.choices) > 0:
             return response.choices[0].message.content or ""
         raise RuntimeError("No response received from the LLM.")
-
-
-def main() -> None:
-    llm = GPTLLM(model=os.environ.get("LLM_MODEL", "gpt-4o-mini"))
-    system_prompt = "You are a helpful assistant."
-    user_prompt = "What is the capital of France? Please answer in one sentence."
-    result = llm.complete(system_prompt, user_prompt)
-    print(result)
-
-
-if __name__ == "__main__":
-    main()

@@ -24,7 +24,6 @@ from expert_finder.entrypoints.api.deps.credentials import (
 )
 from expert_finder.entrypoints.api.deps.tokens import (
     OAUTH2_ALGORITHM,
-    create_access_token,
     issue_access_token,
 )
 from expert_finder.entrypoints.api.deps.persistence import get_question_log_repository
@@ -32,7 +31,6 @@ from expert_finder.entrypoints.api.deps.persistence import get_question_log_repo
 __all__ = [
     "OAUTH2_ALGORITHM",
     "USERNAME_REGEX",
-    "create_access_token",
     "issue_access_token",
     "current_user",
     "get_agent",
