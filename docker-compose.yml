@@ -1,0 +1,15 @@
+services:
+  expert-finder-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    environment:
+      APP_TEST_PASSWORD: ${APP_TEST_PASSWORD:-test_password}
+      SESSION_SECRET_KEY: ${SESSION_SECRET_KEY:-local-dev-session-secret}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      ENVIRONMENT: ${ENVIRONMENT:-staging}
+      EXPERT_FINDER_USE_STUB_LLM: ${EXPERT_FINDER_USE_STUB_LLM:-false}
