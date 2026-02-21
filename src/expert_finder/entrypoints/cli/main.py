@@ -164,7 +164,7 @@ def cli(
             show_default=True,
             case_sensitive=False,
         ),
-    ] = OutputFormat.json,
+    ] = OutputFormat.table,
     profiles_limit: Annotated[
         int,
         typer.Option(
