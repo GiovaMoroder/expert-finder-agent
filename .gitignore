@@ -2,7 +2,6 @@
 __pycache__/
 *.pyc
 .env
-.env.*
 .DS_Store
 .idea/
 data/.gitkeep
@@ -20,8 +19,3 @@ extensions.json
 scripts/shell_scripts/*
 
 # deployment-related
-.dockerignore
-Caddyfile
-docker-compose.yml
-Dockerfile
-Makefile
