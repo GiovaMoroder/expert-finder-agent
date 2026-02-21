@@ -4,8 +4,6 @@ from pathlib import Path
 from typing import Iterable
 from typing import Literal
 
-import pandas as pd
-
 from expert_finder.infrastructure.persistence.csv.csv_base import CsvRepositoryBase
 from expert_finder.domain.models import EducationRecord, RankingRule
 from expert_finder.domain.ports import EducationRepository
