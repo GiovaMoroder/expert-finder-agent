@@ -27,3 +27,11 @@ class ExpertFeedbackEntry:
     score: int
     note: str | None = None
 
+
+@dataclass(frozen=True)
+class QuestionFeedbackEntry:
+    created_at: datetime
+    question_id: str
+    username: str
+    note: str
+

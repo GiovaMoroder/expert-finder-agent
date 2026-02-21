@@ -38,8 +38,9 @@ function feedbackStorageKey({ questionId, question, expertName, linkedinUrl }) {
   return `expert_finder.feedback.${simpleHash(raw)}`;
 }
 
-function overallFeedbackStorageKey(question) {
-  return `expert_finder.overall_feedback.${simpleHash(question || "")}`;
+function overallFeedbackStorageKey({ questionId, question }) {
+  const raw = JSON.stringify({ qid: questionId || "", q: question || "" });
+  return `expert_finder.overall_feedback.${simpleHash(raw)}`;
 }
 
 function loadFeedback(key) {
@@ -105,12 +106,12 @@ function computeExpertKey({ questionId, questionText, expertName, linkedinUrl, i
   return simpleHash(raw);
 }
 
-function renderOverallFeedback(questionForStorage) {
+function renderOverallFeedback({ questionId, questionText }) {
   if (!overallFeedbackEl) return;
   overallFeedbackEl.textContent = "";
-  if (!questionForStorage) return;
+  if (!questionText) return;
 
-  const storageKey = overallFeedbackStorageKey(questionForStorage);
+  const storageKey = overallFeedbackStorageKey({ questionId: questionId || "", question: questionText || "" });
   const saved = loadOverallFeedback(storageKey);
   let savedNote = saved && typeof saved.note === "string" ? saved.note : "";
   let draftNote = savedNote;
@@ -183,6 +184,10 @@ function renderOverallFeedback(questionForStorage) {
   sendBtn.textContent = "Send feedback";
   sendBtn.disabled = true;
 
+  const feedbackError = document.createElement("span");
+  feedbackError.className = "expert-feedback-error";
+  feedbackError.hidden = true;
+
   function isDirty() {
     return draftNote !== savedNote;
   }
@@ -196,16 +201,56 @@ function renderOverallFeedback(questionForStorage) {
     updateDirty();
   });
 
-  sendBtn.addEventListener("click", () => {
-    saveOverallFeedback(storageKey, { note: draftNote });
-    savedNote = draftNote;
-    updateDirty();
-    toggle.textContent = open ? "Hide feedback" : savedNote ? "Edit feedback" : "Add feedback";
-    flashSaved();
+  sendBtn.addEventListener("click", async () => {
+    if (!questionId) {
+      feedbackError.textContent = "Missing question id. Please re-run the question.";
+      feedbackError.hidden = false;
+      return;
+    }
+    feedbackError.hidden = true;
+
+    const prevText = sendBtn.textContent;
+    sendBtn.textContent = "Sending...";
+    sendBtn.disabled = true;
+
+    try {
+      const response = await fetch("/api/feedback/question", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question_id: questionId, note: draftNote }),
+      });
+
+      if (response.status === 401) {
+        window.location.href = "/login";
+        return;
+      }
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        feedbackError.textContent =
+          (payload && payload.detail) || "Could not send feedback. Please try again.";
+        feedbackError.hidden = false;
+        return;
+      }
+
+      // Keep a local copy too.
+      saveOverallFeedback(storageKey, { note: draftNote });
+      savedNote = draftNote;
+      updateDirty();
+      toggle.textContent = open ? "Hide feedback" : savedNote ? "Edit feedback" : "Add feedback";
+      flashSaved();
+    } catch (e) {
+      feedbackError.textContent = "Network error. Please try again.";
+      feedbackError.hidden = false;
+    } finally {
+      sendBtn.textContent = prevText;
+      updateDirty();
+    }
   });
 
   footerLeft.appendChild(toggle);
   footerRight.appendChild(savedEl);
+  footerRight.appendChild(feedbackError);
   footerRight.appendChild(sendBtn);
   footer.appendChild(footerLeft);
   footer.appendChild(footerRight);
@@ -518,7 +563,10 @@ if (askForm && outputEl && errorEl) {
     }
 
     renderRawJson(payload);
-    renderOverallFeedback(payload && payload.question ? payload.question : question);
+    renderOverallFeedback({
+      questionId: payload && payload.question_id ? payload.question_id : null,
+      questionText: payload && payload.question ? payload.question : question,
+    });
     const experts = payload && payload.result && payload.result.experts;
     if (!Array.isArray(experts) || experts.length === 0) {
       outputEl.textContent = "No experts found for this question.";

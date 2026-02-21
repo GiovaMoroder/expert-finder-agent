@@ -41,7 +41,23 @@ class ExpertFeedbackRow(Base):
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
+class QuestionFeedbackRow(Base):
+    __tablename__ = "question_feedback"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
+    question_id: Mapped[str] = mapped_column(
+        String(64),
+        ForeignKey("question_logs.question_id"),
+        nullable=False,
+        index=True,
+    )
+    username: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    note: Mapped[str] = mapped_column(Text, nullable=False)
+
+
 Index("idx_question_logs_username_created_at", QuestionLogRow.username, QuestionLogRow.created_at)
 Index("idx_question_logs_question_id", QuestionLogRow.question_id, unique=True)
 Index("idx_expert_feedback_question_id_created_at", ExpertFeedbackRow.question_id, ExpertFeedbackRow.created_at)
+Index("idx_question_feedback_question_id_created_at", QuestionFeedbackRow.question_id, QuestionFeedbackRow.created_at)
 

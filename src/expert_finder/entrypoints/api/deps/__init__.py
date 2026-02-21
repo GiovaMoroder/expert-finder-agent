@@ -29,6 +29,7 @@ from expert_finder.entrypoints.api.deps.tokens import (
 from expert_finder.entrypoints.api.deps.persistence import (
     get_expert_feedback_repository_cached,
     get_question_log_repository_cached,
+    get_question_feedback_repository_cached,
 )
 
 __all__ = [
@@ -38,6 +39,7 @@ __all__ = [
     "current_user",
     "get_agent_cached",
     "get_expert_feedback_repository_cached",
+    "get_question_feedback_repository_cached",
     "get_question_log_repository_cached",
     "oauth2_scheme",
     "require_bearer_user",

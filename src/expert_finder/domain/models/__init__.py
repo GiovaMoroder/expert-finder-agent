@@ -1,6 +1,6 @@
 from .records import EducationRecord, WorkExperienceRecord
 from .experts import Candidate, QueryExtraction, FinalExpert, FinalResult, RankingRule
-from .question_logs import ExpertFeedbackEntry, QuestionLogEntry
+from .question_logs import ExpertFeedbackEntry, QuestionFeedbackEntry, QuestionLogEntry
 
 __all__ = [
     "EducationRecord",
@@ -12,4 +12,5 @@ __all__ = [
     "FinalResult",
     "QuestionLogEntry",
     "ExpertFeedbackEntry",
+    "QuestionFeedbackEntry",
 ]
