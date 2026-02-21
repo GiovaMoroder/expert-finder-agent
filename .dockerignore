@@ -1,0 +1,8 @@
+*
+!src/
+!src/**
+!data/processed/
+!data/processed/**
+!pyproject.toml
+!uv.lock
+!README.md

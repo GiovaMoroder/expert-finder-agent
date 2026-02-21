@@ -129,8 +129,3 @@ def get_question_feedback_repository(
     """Construct the default QuestionFeedbackRepository."""
     settings = settings or get_api_settings()
     return SqlAlchemyQuestionFeedbackRepository(db_url=settings.question_logs_db_url)
-
-if __name__ == "__main__":
-    # instantiate the agent and test it with a sample question
-    agent = get_agent()
-    print(agent)
