@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from time import perf_counter
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 
 from expert_finder.application.service import ask_question
+from expert_finder.domain.agents.expert_finder import ExpertFinderAgent
 from expert_finder.domain.models.question_logs import QuestionLogEntry
 from expert_finder.domain.ports.repositories import QuestionLogRepository
 from expert_finder.entrypoints.api.deps import (
@@ -29,8 +31,9 @@ def healthz() -> dict[str, str]:
 @router.post("/api/ask")
 def api_ask(
     payload: AskRequest,
-    username: str = Depends(require_bearer_user),
-    question_logs: QuestionLogRepository = Depends(get_question_log_repository),
+    username: Annotated[str, Depends(require_bearer_user)],
+    agent: Annotated[ExpertFinderAgent, Depends(get_agent)],
+    question_logs: Annotated[QuestionLogRepository, Depends(get_question_log_repository)],
 ) -> dict[str, object]:
     question = payload.question.strip()
     if not question:
@@ -39,7 +42,7 @@ def api_ask(
     created_at = datetime.now(timezone.utc)
     started = perf_counter()
     try:
-        result = ask_question(question, agent=get_agent())
+        result = ask_question(question, agent=agent)
         latency_ms = int((perf_counter() - started) * 1000)
         try:
             question_logs.append(
@@ -51,9 +54,9 @@ def api_ask(
                     latency_ms=latency_ms,
                 )
             )
-        except Exception:
+        except Exception as log_exc:
             # Logging must not break the main endpoint.
-            print(f"Error logging question: {exc}")
+            print(f"Error logging question: {log_exc}")
         return result
     except Exception as exc:
         latency_ms = int((perf_counter() - started) * 1000)
@@ -68,8 +71,7 @@ def api_ask(
                     error_message=str(exc),
                 )
             )
-        except Exception:
+        except Exception as log_exc:
             # Logging must not break the main endpoint.
-            print(f"Error logging question: {exc}")
+            print(f"Error logging question: {log_exc}")
         raise
-

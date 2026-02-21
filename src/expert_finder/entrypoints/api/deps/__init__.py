@@ -20,23 +20,22 @@ from expert_finder.entrypoints.api.deps.auth import (
 )
 from expert_finder.entrypoints.api.deps.credentials import (
     USERNAME_REGEX,
-    validate_login_credentials,
+    validate_credentials,
 )
 from expert_finder.entrypoints.api.deps.tokens import (
     OAUTH2_ALGORITHM,
-    create_access_token,
+    issue_access_token,
 )
 from expert_finder.entrypoints.api.deps.persistence import get_question_log_repository
 
 __all__ = [
     "OAUTH2_ALGORITHM",
     "USERNAME_REGEX",
-    "create_access_token",
+    "issue_access_token",
     "current_user",
     "get_agent",
     "get_question_log_repository",
     "oauth2_scheme",
     "require_bearer_user",
-    "validate_login_credentials",
+    "validate_credentials",
 ]
-

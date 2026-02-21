@@ -35,12 +35,13 @@ class SqlAlchemyQuestionLogRepository(QuestionLogRepository):
     def __init__(
         self,
         *,
+        db_url: str | None = None,
         db_path: Path | None = None,
         engine: Engine | None = None,
         session_factory: sessionmaker[Session] | None = None,
         create_tables: bool = True,
     ) -> None:
-        self._engine = engine or build_engine(db_path)
+        self._engine = engine or build_engine(db_url=db_url, db_path=db_path)
         self._session_factory = session_factory or build_session_factory(self._engine)
         if create_tables:
             Base.metadata.create_all(self._engine)
@@ -93,4 +94,3 @@ class SqlAlchemyQuestionLogRepository(QuestionLogRepository):
             )
             for r in rows
         ]
-

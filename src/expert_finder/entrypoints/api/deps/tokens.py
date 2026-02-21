@@ -2,35 +2,39 @@
 
 from __future__ import annotations
 
-import os
 from datetime import datetime, timedelta, timezone
 
 from jose import JWTError, jwt
 
+from expert_finder.config.settings import ApiSettings
+from expert_finder.config.settings import get_api_settings
+
 OAUTH2_ALGORITHM = "HS256"
 
 
-def _oauth2_secret_key() -> str:
-    secret = os.environ.get("OAUTH2_SECRET_KEY")
-    if not isinstance(secret, str) or not secret.strip():
-        raise RuntimeError("OAUTH2_SECRET_KEY environment variable is not set")
-    return secret
-
-
-def create_access_token(*, username: str) -> str:
-    expires_minutes = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES"))
-    expire_at = datetime.now(timezone.utc) + timedelta(minutes=expires_minutes)
+def issue_access_token(*, username: str, settings: ApiSettings) -> str:
+    expire_at = datetime.now(timezone.utc) + timedelta(minutes=settings.access_token_expire_minutes)
     payload = {"sub": username, "exp": expire_at}
-    return jwt.encode(payload, _oauth2_secret_key(), algorithm=OAUTH2_ALGORITHM)
+    return jwt.encode(payload, settings.oauth2_secret_key, algorithm=OAUTH2_ALGORITHM)
 
 
-def decode_access_token(token: str) -> dict:
+def decode_access_token_with_settings(token: str, settings: ApiSettings) -> dict:
     """
     Decode/validate a token and return the JWT payload.
 
     Raises jose.JWTError on failure.
     """
-    return jwt.decode(token, _oauth2_secret_key(), algorithms=[OAUTH2_ALGORITHM])
+    return jwt.decode(token, settings.oauth2_secret_key, algorithms=[OAUTH2_ALGORITHM])
 
 
-__all__ = ["JWTError", "OAUTH2_ALGORITHM", "create_access_token", "decode_access_token"]
+def decode_access_token(token: str) -> dict:
+    return decode_access_token_with_settings(token, get_api_settings())
+
+
+__all__ = [
+    "JWTError",
+    "OAUTH2_ALGORITHM",
+    "decode_access_token",
+    "decode_access_token_with_settings",
+    "issue_access_token",
+]

@@ -89,15 +89,3 @@ class ProfileComparisonTool:
             logger.debug("Final result: %s", result.model_dump(mode="json"))
         return result
 
-
-def main() -> None:
-    tool = ProfileComparisonTool(
-        education_search=EducationSearchTool(),
-        professional_search=WorkExperienceSearchTool(),
-    )
-    profiles = tool.build_profiles(["Matteo Oldani"])
-    print(json.dumps(profiles, indent=2))
-
-
-if __name__ == "__main__":
-    main()

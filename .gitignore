@@ -8,7 +8,21 @@ __pycache__/
 data/.gitkeep
 data/mentees.json
 data/sample_requests.json
-data/sample_requests_results.json
+data/sample_requests_results*.json
+data/expert_finder.sqlite3
 data/raw/*
 data/processed/*
 
+#vs code
+extensions.json
+
+#random scripts
+scripts/shell_scripts/*
+scripts/count_university_instances.py
+
+# deployment-related
+.dockerignore
+Caddyfile
+docker-compose.yml
+Dockerfile
+Makefile

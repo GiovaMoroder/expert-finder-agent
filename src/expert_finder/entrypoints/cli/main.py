@@ -6,22 +6,19 @@ import json
 from enum import Enum
 from typing import Annotated
 from typing import Any
-from typing import Optional
 
 import typer
 from rich.console import Console
 from rich.table import Table
 
+from expert_finder.application.factory import build_agent
+from expert_finder.config.settings import AgentSettings
+from expert_finder.config.settings import AgentSettingsProvider
 from expert_finder.domain.agents.expert_finder import ExpertFinderAgent
 from expert_finder.domain.agents.expert_finder import ExpertFinderRunOutput
-from expert_finder.domain.tools.education_search import EducationSearchTool
-from expert_finder.domain.tools.profile_compare import ProfileComparisonTool
-from expert_finder.domain.tools.work_experience_search import WorkExperienceSearchTool
-from expert_finder.infrastructure.config import SETTINGS
-from expert_finder.infrastructure.llm.adapters.gpt import GPTLLM
+from expert_finder.config.settings import get_agent_settings
+from expert_finder.config.settings import SupportedModel
 from expert_finder.infrastructure.logging import setup_logging, silence_third_party_loggers
-from expert_finder.infrastructure.persistence.csv.education_repo import CsvEducationRepository
-from expert_finder.infrastructure.persistence.csv.work_experience_repo import CsvWorkExperienceRepository
 
 app = typer.Typer(
     add_completion=True,
@@ -35,20 +32,6 @@ class OutputFormat(str, Enum):
     json = "json"
     table = "table"
     both = "both"
-
-
-def build_agent(*, model: str) -> ExpertFinderAgent:
-    education_search = EducationSearchTool(education_repo=CsvEducationRepository())
-    professional_search = WorkExperienceSearchTool(work_repo=CsvWorkExperienceRepository())
-    return ExpertFinderAgent(
-        llm=GPTLLM(model=model),
-        education_search=education_search,
-        professional_search=professional_search,
-        profile_compare=ProfileComparisonTool(
-            education_search=education_search,
-            professional_search=professional_search,
-        ),
-    )
 
 
 def _render_experts_table(run_output: ExpertFinderRunOutput) -> Table:
@@ -94,10 +77,25 @@ def _emit_json_compat(run_output: ExpertFinderRunOutput, *, profiles_limit: int)
     typer.echo(json.dumps(formatted_experts, indent=2))
 
 
+def _cli_settings_provider(*, model: SupportedModel | None) -> AgentSettingsProvider:
+    base_settings = get_agent_settings()
+    overrides: dict[str, object] = {}
+    if model is not None:
+        overrides["gpt_model"] = model
+
+    if not overrides:
+        return get_agent_settings
+
+    def provider() -> AgentSettings:
+        return base_settings.model_copy(update=overrides)
+
+    return provider
+
+
 def _run(
     question: str,
     *,
-    model: str,
+    model: SupportedModel | None,
     log_level: str,
     output: OutputFormat,
     profiles_limit: int,
@@ -105,7 +103,7 @@ def _run(
     show_context: bool,
 ) -> None:
     setup_logging(log_level)
-    agent = build_agent(model=model)
+    agent = build_agent(settings_provider=_cli_settings_provider(model=model))
     # Re-silence OpenAI/HTTP loggers in case the SDK set DEBUG on import
     silence_third_party_loggers()
     run_output = agent.run_with_metrics(question)
@@ -131,9 +129,8 @@ def _run(
 
 @app.callback(invoke_without_command=True)
 def cli(
-    ctx: typer.Context,
     question: Annotated[
-        Optional[str],
+        str | None,
         typer.Argument(
             help="Natural-language query.",
         ),
@@ -148,14 +145,14 @@ def cli(
         ),
     ] = "INFO",
     model: Annotated[
-        str,
+        SupportedModel | None,
         typer.Option(
             "--model",
             envvar="LLM_MODEL",
             help="LLM model name.",
-            show_default=True,
+            show_default=False,
         ),
-    ] = SETTINGS.gpt_model,
+    ] = None,
     output: Annotated[
         OutputFormat,
         typer.Option(

@@ -28,6 +28,7 @@ api = [
   "fastapi[standard]>=0.129.0",
   "uvicorn>=0.41.0",
   "sqlalchemy>=2.0.46",
+  "psycopg[binary]>=3.2.10",
 ]
 
 cli = [
