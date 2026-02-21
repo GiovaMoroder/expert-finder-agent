@@ -43,21 +43,6 @@ def get_agent_modified(*, model: SupportedModel | None) -> ExpertFinderAgent:
     return get_agent(llm=llm)
 
 
-def _cli_settings_provider(*, model: SupportedModel | None) -> AgentSettingsProvider:
-    base_settings = get_agent_settings()
-    overrides: dict[str, object] = {}
-    if model is not None:
-        overrides["gpt_model"] = model
-
-    if not overrides:
-        return get_agent_settings
-
-    def provider() -> AgentSettings:
-        return base_settings.model_copy(update=overrides)
-
-    return provider
-
-
 def _run(
     question: str,
     *,

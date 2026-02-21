@@ -26,7 +26,11 @@ from expert_finder.entrypoints.api.deps.tokens import (
     OAUTH2_ALGORITHM,
     issue_access_token,
 )
-from expert_finder.entrypoints.api.deps.persistence import get_question_log_repository_cached
+from expert_finder.entrypoints.api.deps.persistence import (
+    get_expert_feedback_repository_cached,
+    get_question_log_repository_cached,
+    get_question_feedback_repository_cached,
+)
 
 __all__ = [
     "OAUTH2_ALGORITHM",
@@ -34,6 +38,8 @@ __all__ = [
     "issue_access_token",
     "current_user",
     "get_agent_cached",
+    "get_expert_feedback_repository_cached",
+    "get_question_feedback_repository_cached",
     "get_question_log_repository_cached",
     "oauth2_scheme",
     "require_bearer_user",

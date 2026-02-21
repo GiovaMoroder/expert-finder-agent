@@ -11,6 +11,7 @@ from expert_finder.domain.ports.repositories import QuestionLogRepository
 from expert_finder.infrastructure.persistence.sqlalchemy.base import Base
 from expert_finder.infrastructure.persistence.sqlalchemy.db import build_engine, build_session_factory
 from expert_finder.infrastructure.persistence.sqlalchemy.models import QuestionLogRow
+from expert_finder.infrastructure.persistence.sqlalchemy.schema import ensure_question_id_column
 
 
 def _to_utc_naive(dt: datetime) -> datetime:
@@ -44,10 +45,12 @@ class SqlAlchemyQuestionLogRepository(QuestionLogRepository):
         self._engine = engine or build_engine(db_url=db_url, db_path=db_path)
         self._session_factory = session_factory or build_session_factory(self._engine)
         if create_tables:
+            ensure_question_id_column(self._engine)
             Base.metadata.create_all(self._engine)
 
     def append(self, entry: QuestionLogEntry) -> None:
         row = QuestionLogRow(
+            question_id=entry.question_id,
             created_at=_to_utc_naive(entry.created_at),
             username=entry.username,
             question=entry.question,
@@ -85,6 +88,7 @@ class SqlAlchemyQuestionLogRepository(QuestionLogRepository):
 
         return [
             QuestionLogEntry(
+                question_id=r.question_id or "",
                 created_at=_from_utc_naive(r.created_at),
                 username=r.username,
                 question=r.question,

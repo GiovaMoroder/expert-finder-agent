@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from time import perf_counter
 from typing import Annotated
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -17,7 +18,7 @@ from expert_finder.entrypoints.api.deps import (
     get_question_log_repository_cached,
     require_bearer_user,
 )
-from expert_finder.entrypoints.api.schemas.qa import AskRequest
+from expert_finder.entrypoints.api.schemas.qa import AskRequest, AskResponse
 
 
 router = APIRouter(tags=["core"])
@@ -34,11 +35,12 @@ def api_ask(
     username: Annotated[str, Depends(require_bearer_user)],
     agent: Annotated[ExpertFinderAgent, Depends(get_agent_cached)],
     question_logs: Annotated[QuestionLogRepository, Depends(get_question_log_repository_cached)],
-) -> dict[str, object]:
+) -> AskResponse:
     question = payload.question.strip()
     if not question:
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
 
+    question_id = uuid4().hex
     created_at = datetime.now(timezone.utc)
     started = perf_counter()
     try:
@@ -47,6 +49,7 @@ def api_ask(
         try:
             question_logs.append(
                 QuestionLogEntry(
+                    question_id=question_id,
                     created_at=created_at,
                     username=username,
                     question=question,
@@ -57,12 +60,13 @@ def api_ask(
         except Exception as log_exc:
             # Logging must not break the main endpoint.
             print(f"Error logging question: {log_exc}")
-        return result
+        return AskResponse(question_id=question_id, question=result.question, result=result.result)
     except Exception as exc:
         latency_ms = int((perf_counter() - started) * 1000)
         try:
             question_logs.append(
                 QuestionLogEntry(
+                    question_id=question_id,
                     created_at=created_at,
                     username=username,
                     question=question,

@@ -16,8 +16,16 @@ from expert_finder.domain.tools.work_experience_search import WorkExperienceSear
 from expert_finder.infrastructure.llm.adapters.gpt import GPTLLM
 from expert_finder.infrastructure.persistence.csv.education_repo import CsvEducationRepository
 from expert_finder.infrastructure.persistence.csv.work_experience_repo import CsvWorkExperienceRepository
+from expert_finder.infrastructure.persistence.sqlalchemy.expert_feedback_repo import (
+    SqlAlchemyExpertFeedbackRepository,
+)
+from expert_finder.infrastructure.persistence.sqlalchemy.question_feedback_repo import (
+    SqlAlchemyQuestionFeedbackRepository,
+)
 from expert_finder.infrastructure.persistence.sqlalchemy.question_logs_repo import SqlAlchemyQuestionLogRepository
 from expert_finder.domain.ports.repositories import QuestionLogRepository
+from expert_finder.domain.ports.repositories import ExpertFeedbackRepository
+from expert_finder.domain.ports.repositories import QuestionFeedbackRepository
 
 
 def get_llm(
@@ -105,6 +113,22 @@ def get_question_log_repository(
     """Construct the QuestionLogRepository."""
     settings = settings or get_api_settings()
     return SqlAlchemyQuestionLogRepository(db_url=settings.question_logs_db_url)
+
+
+def get_expert_feedback_repository(
+    settings: ApiSettings | None = None,
+) -> ExpertFeedbackRepository:
+    """Construct the default ExpertFeedbackRepository."""
+    settings = settings or get_api_settings()
+    return SqlAlchemyExpertFeedbackRepository(db_url=settings.question_logs_db_url)
+
+
+def get_question_feedback_repository(
+    settings: ApiSettings | None = None,
+) -> QuestionFeedbackRepository:
+    """Construct the default QuestionFeedbackRepository."""
+    settings = settings or get_api_settings()
+    return SqlAlchemyQuestionFeedbackRepository(db_url=settings.question_logs_db_url)
 
 if __name__ == "__main__":
     # instantiate the agent and test it with a sample question

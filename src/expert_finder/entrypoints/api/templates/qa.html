@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Expert Finder</title>
-  <link rel="stylesheet" href="/static/app.css" />
+  <link rel="stylesheet" href="/static/app.css?v={{ static_version }}" />
 </head>
 <body class="qa-body">
   <main class="qa-container">
@@ -27,8 +27,14 @@
       </div>
       <p id="error" class="error"></p>
     </form>
-    <pre id="output">Ask a question to see the JSON payload returned by the agent.</pre>
+    <pre id="output">Ask a question to see suggested experts.</pre>
+    <section id="experts" class="experts" aria-live="polite"></section>
+    <section id="overall-feedback" class="overall-feedback" aria-live="polite"></section>
+    <details id="raw-json" class="raw-json">
+      <summary class="raw-json-toggle" aria-label="Show raw JSON response"></summary>
+      <pre id="raw-json-content" class="raw-json-content"></pre>
+    </details>
   </main>
-  <script src="/static/qa.js"></script>
+  <script src="/static/qa.js?v={{ static_version }}"></script>
 </body>
 </html>
