@@ -14,8 +14,3 @@ data/processed/*
 
 #vs code
 extensions.json
-
-#random scripts
-scripts/shell_scripts/*
-
-# deployment-related
