@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from expert_finder.application.service import ask_question
 from expert_finder.domain.agents.expert_finder import ExpertFinderAgent
 from expert_finder.domain.models.question_logs import QuestionLogEntry
+from expert_finder.domain.models.experts import AskQuestionResult
 from expert_finder.domain.ports.repositories import QuestionLogRepository
 from expert_finder.entrypoints.api.deps import (
     get_agent_cached,
@@ -34,7 +35,7 @@ def api_ask(
     username: Annotated[str, Depends(require_bearer_user)],
     agent: Annotated[ExpertFinderAgent, Depends(get_agent_cached)],
     question_logs: Annotated[QuestionLogRepository, Depends(get_question_log_repository_cached)],
-) -> dict[str, object]:
+) -> AskQuestionResult:
     question = payload.question.strip()
     if not question:
         raise HTTPException(status_code=400, detail="Question cannot be empty.")

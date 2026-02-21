@@ -42,3 +42,7 @@ class FinalExpert(BaseModel):
 
 class FinalResult(BaseModel):
     experts: list[FinalExpert] = Field(..., min_length=0, max_length=3)
+
+class AskQuestionResult(BaseModel):
+    question: str
+    result: FinalResult
