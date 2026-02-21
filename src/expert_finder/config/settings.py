@@ -47,7 +47,9 @@ class ApiSettings(BaseSettings):
 
 class AgentSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
-    gpt_model: SupportedModel = Field(default=SupportedModel.GPT_4O_MINI, alias="LLM_MODEL")
+    gpt_model: SupportedModel = Field(default=SupportedModel.GPT_5_2, alias="LLM_MODEL")
+    llm_temperature: float = Field(default=0.0, alias="LLM_TEMPERATURE", ge=0.0, le=1.0)
+    search_top_k: int = Field(default=5, alias="SEARCH_TOP_K", gt=0)
 
 
 class InfisicalSettings(BaseSettings):
@@ -57,11 +59,6 @@ class InfisicalSettings(BaseSettings):
     project_id: str = Field(alias="INFISICAL_PROJECT_ID")
     environment_slug: str = Field(default="staging", alias="INFISICAL_ENVIRONMENT")
     host: str = Field(default="https://app.infisical.com", alias="INFISICAL_HOST")
-
-
-ApiSettingsProvider = Callable[[], ApiSettings]
-AgentSettingsProvider = Callable[[], AgentSettings]
-InfisicalSettingsProvider = Callable[[], InfisicalSettings]
 
 
 @lru_cache(maxsize=1)

@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from expert_finder.entrypoints.api.deps import get_agent
 from expert_finder.entrypoints.api.routers import auth, qa, ui
 from expert_finder.infrastructure.logging import setup_logging, silence_third_party_loggers
 
@@ -35,3 +34,14 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
+
+
+def run_local_api() -> None:
+    import uvicorn
+
+    uvicorn.run(
+        "expert_finder.entrypoints.api.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
+    )

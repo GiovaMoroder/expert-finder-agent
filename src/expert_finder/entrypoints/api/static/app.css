@@ -129,6 +129,13 @@ button:hover {
   margin-right: 8px;
 }
 
+.bot-help {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+  color: #2b3a33;
+  line-height: 1.45;
+}
+
 #ask-form {
   display: grid;
   gap: 10px;
@@ -165,4 +172,3 @@ pre {
   font-size: 0.85rem;
   line-height: 1.4;
 }
-

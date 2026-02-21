@@ -17,19 +17,26 @@ class WorkExperienceSearchTool:
     AVAILABLE_COLUMNS = tuple(field.name for field in fields(WorkExperienceRecord))
     DEFAULT_FILTER_COLUMN = "company"
 
-    def __init__(self, work_repo: WorkExperienceRepository | None = None) -> None:
+    def __init__(self,
+        work_repo: WorkExperienceRepository | None = None,
+        search_top_k: int | None = None,
+    ) -> None:
         self.work_repo = work_repo
+        self.search_top_k = search_top_k
 
     def search(
         self,
         filter_column: str | None = None,
         filter_value: str | None = None,
-        top_k: int = 10,
+        top_k: int | None = None,
         min_score: float = 0.0,
         sort_by: str | None = None,
         sort_order: Literal["asc", "desc"] | None = None,
         ranking: dict[str, RankingRule] | None = None,
     ) -> list[str]:
+
+        top_k = top_k or self.search_top_k
+
         return self.work_repo.search(
             filter_column=filter_column,
             filter_value=filter_value,
@@ -64,7 +71,7 @@ class WorkExperienceSearchTool:
             - The objective is to find people who can help the asker reach their target opportunity.
             - Prioritize the target institution/opportunity context over the asker's background context.
             - Role disambiguation: treat "quant" as a job role (quantitative researcher), not generic
-              quantitative skills. Any search or ranking should use "quantitative researcher" as the role, not "quant" alone.
+              quantitative skills. Never use "quant" in search or ranking, use "quantitative researcher" instead.
 
             FILTER RULES:
             - Allowed columns are: {available_columns}.

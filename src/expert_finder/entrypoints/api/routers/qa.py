@@ -13,8 +13,8 @@ from expert_finder.domain.agents.expert_finder import ExpertFinderAgent
 from expert_finder.domain.models.question_logs import QuestionLogEntry
 from expert_finder.domain.ports.repositories import QuestionLogRepository
 from expert_finder.entrypoints.api.deps import (
-    get_agent,
-    get_question_log_repository,
+    get_agent_cached,
+    get_question_log_repository_cached,
     require_bearer_user,
 )
 from expert_finder.entrypoints.api.schemas.qa import AskRequest
@@ -32,8 +32,8 @@ def healthz() -> dict[str, str]:
 def api_ask(
     payload: AskRequest,
     username: Annotated[str, Depends(require_bearer_user)],
-    agent: Annotated[ExpertFinderAgent, Depends(get_agent)],
-    question_logs: Annotated[QuestionLogRepository, Depends(get_question_log_repository)],
+    agent: Annotated[ExpertFinderAgent, Depends(get_agent_cached)],
+    question_logs: Annotated[QuestionLogRepository, Depends(get_question_log_repository_cached)],
 ) -> dict[str, object]:
     question = payload.question.strip()
     if not question:

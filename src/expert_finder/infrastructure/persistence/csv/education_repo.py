@@ -24,6 +24,8 @@ class CsvEducationRepository(CsvRepositoryBase, EducationRepository):
             yield EducationRecord(
                 full_name=row.get("full_name"),
                 institution=row.get("institution"),
+                current_location=row.get("current_location"),
+                linkedin_url=row.get("linkedin_url"),
                 degree=row.get("degree"),
                 field_of_study=row.get("field_of_study"),
                 start_date=row.get("start_date"),
@@ -44,6 +46,8 @@ class CsvEducationRepository(CsvRepositoryBase, EducationRepository):
                 EducationRecord(
                     full_name=row.get("full_name"),
                     institution=row.get("institution"),
+                    current_location=row.get("current_location"),
+                    linkedin_url=row.get("linkedin_url"),
                     degree=row.get("degree"),
                     field_of_study=row.get("field_of_study"),
                     start_date=row.get("start_date"),
@@ -57,7 +61,7 @@ class CsvEducationRepository(CsvRepositoryBase, EducationRepository):
         self,
         filter_column: str | None = None,
         filter_value: str | None = None,
-        top_k: int = 10,
+        top_k: int | None = None,
         min_score: float = 0.0,
         sort_by: str | None = None,
         sort_order: Literal["asc", "desc"] | None = None,
