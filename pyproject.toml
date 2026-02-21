@@ -42,6 +42,7 @@ notebooks = [
 
 [project.scripts]
 expert-finder = "expert_finder.entrypoints.cli.main:main"
+run-local-api = "expert_finder.entrypoints.api.main:run_local_api"
 
 [tool.pytest.ini_options]
 addopts = "-q"

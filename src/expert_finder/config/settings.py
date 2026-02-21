@@ -49,6 +49,7 @@ class AgentSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
     gpt_model: SupportedModel = Field(default=SupportedModel.GPT_5_2, alias="LLM_MODEL")
     llm_temperature: float = Field(default=0.0, alias="LLM_TEMPERATURE", ge=0.0, le=1.0)
+    search_top_k: int = Field(default=5, alias="SEARCH_TOP_K", gt=0)
 
 
 class InfisicalSettings(BaseSettings):

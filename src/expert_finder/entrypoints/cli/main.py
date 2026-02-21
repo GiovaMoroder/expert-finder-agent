@@ -14,7 +14,6 @@ from expert_finder.application.deps import get_agent
 from expert_finder.application.deps import get_llm
 from expert_finder.config.settings import AgentSettings
 from expert_finder.domain.agents.expert_finder import ExpertFinderAgent
-from expert_finder.domain.agents.expert_finder import ExpertFinderRunOutput
 from expert_finder.config.settings import get_agent_settings
 from expert_finder.config.settings import SupportedModel
 from expert_finder.entrypoints.cli.presentation import emit_json_compat

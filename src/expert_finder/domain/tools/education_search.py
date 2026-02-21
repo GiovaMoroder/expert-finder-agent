@@ -18,8 +18,12 @@ class EducationSearchTool:
     AVAILABLE_COLUMNS = tuple(field.name for field in fields(EducationRecord))
     DEFAULT_FILTER_COLUMN = "institution"
 
-    def __init__(self, education_repo: EducationRepository | None = None) -> None:
+    def __init__(self,
+        education_repo: EducationRepository | None = None,
+        search_top_k: int | None = None,
+                 ) -> None:
         self.education_repo = education_repo
+        self.search_top_k = search_top_k
 
     def search(
         self,
@@ -31,6 +35,9 @@ class EducationSearchTool:
         sort_order: Literal["asc", "desc"] | None = None,
         ranking: dict[str, RankingRule] | None = None,
     ) -> list[str]:
+
+        top_k = top_k or self.search_top_k
+
         if not filter_value:
             normalized_query = None
         else:

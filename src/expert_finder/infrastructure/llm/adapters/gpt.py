@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import logging
+
 from openai import OpenAI
 
 from expert_finder.config.secrets import get_secret as inf_get_secret
 from expert_finder.domain.ports import LLMPort, SecretGetter
+
+logger = logging.getLogger(__name__)
 
 
 class GPTLLM(LLMPort):
@@ -25,6 +29,11 @@ class GPTLLM(LLMPort):
         self._client = OpenAI(api_key=api_key)
 
     def complete(self, system_prompt: str, user_prompt: str) -> str:
+        logger.info(
+            "Calling OpenAI chat completion with model=%s temperature=%s",
+            self.model,
+            self.temperature,
+        )
         response = self._client.chat.completions.create(
             model=self.model,
             messages=[

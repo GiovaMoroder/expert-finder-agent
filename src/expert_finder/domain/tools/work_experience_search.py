@@ -17,8 +17,12 @@ class WorkExperienceSearchTool:
     AVAILABLE_COLUMNS = tuple(field.name for field in fields(WorkExperienceRecord))
     DEFAULT_FILTER_COLUMN = "company"
 
-    def __init__(self, work_repo: WorkExperienceRepository | None = None) -> None:
+    def __init__(self,
+        work_repo: WorkExperienceRepository | None = None,
+        search_top_k: int | None = None,
+    ) -> None:
         self.work_repo = work_repo
+        self.search_top_k = search_top_k
 
     def search(
         self,
@@ -30,6 +34,9 @@ class WorkExperienceSearchTool:
         sort_order: Literal["asc", "desc"] | None = None,
         ranking: dict[str, RankingRule] | None = None,
     ) -> list[str]:
+
+        top_k = top_k or self.search_top_k
+
         return self.work_repo.search(
             filter_column=filter_column,
             filter_value=filter_value,

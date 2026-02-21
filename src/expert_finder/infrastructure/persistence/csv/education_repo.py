@@ -61,7 +61,7 @@ class CsvEducationRepository(CsvRepositoryBase, EducationRepository):
         self,
         filter_column: str | None = None,
         filter_value: str | None = None,
-        top_k: int = 10,
+        top_k: int | None = None,
         min_score: float = 0.0,
         sort_by: str | None = None,
         sort_order: Literal["asc", "desc"] | None = None,

@@ -40,18 +40,28 @@ def get_work_experience_repository() -> WorkExperienceRepository:
 
 def get_education_search_tool(
     education_repo: EducationRepository | None = None,
+    agent_settings: AgentSettings | None = None,
 ) -> EducationSearchTool:
     """Construct the EducationSearchTool."""
     education_repo = education_repo or get_education_repository()
-    return EducationSearchTool(education_repo=education_repo)
+    agent_settings = agent_settings or get_agent_settings()
+    return EducationSearchTool(
+        education_repo=education_repo,
+        search_top_k=agent_settings.search_top_k,
+    )
 
 
 def get_work_experience_search_tool(
     work_repo: WorkExperienceRepository | None = None,
+    agent_settings: AgentSettings | None = None,
 ) -> WorkExperienceSearchTool:
     """Construct the WorkExperienceSearchTool."""
     work_repo = work_repo or get_work_experience_repository()
-    return WorkExperienceSearchTool(work_repo=work_repo)
+    agent_settings = agent_settings or get_agent_settings()
+    return WorkExperienceSearchTool(
+        work_repo=work_repo,
+        search_top_k=agent_settings.search_top_k,
+    )
 
 
 def get_profile_comparison_tool(
