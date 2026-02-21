@@ -11,7 +11,10 @@ from expert_finder.domain.models.experts import AskQuestionResult
 
 
 
-def ask_question(question: str, agent: ExpertFinderAgent | None = None) -> AskQuestionResult:
+def ask_question(
+    question: str,
+    agent: ExpertFinderAgent | None = None,
+) -> AskQuestionResult:
     """Run the expert finder and return the user-facing response payload."""
     selected_agent = agent or get_agent()
     result = selected_agent.run(question)

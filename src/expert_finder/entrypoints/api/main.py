@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from expert_finder.entrypoints.api.routers import auth, qa, ui
+from expert_finder.entrypoints.api.routers import auth, feedback, qa, ui
 from expert_finder.infrastructure.logging import setup_logging, silence_third_party_loggers
 
 
@@ -30,6 +30,7 @@ def create_app() -> FastAPI:
     app.include_router(auth.router)
     app.include_router(ui.router)
     app.include_router(qa.router)
+    app.include_router(feedback.router)
     return app
 
 

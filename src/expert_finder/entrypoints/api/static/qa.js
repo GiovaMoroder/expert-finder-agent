@@ -7,6 +7,8 @@ const rawJsonContentEl = document.getElementById("raw-json-content");
 const errorEl = document.getElementById("error");
 const logoutBtn = document.getElementById("logout");
 
+let currentQuestionId = null;
+
 function safeJsonParse(value) {
   if (!value) return null;
   try {
@@ -26,8 +28,9 @@ function simpleHash(str) {
   return (h >>> 0).toString(16);
 }
 
-function feedbackStorageKey({ question, expertName, linkedinUrl }) {
+function feedbackStorageKey({ questionId, question, expertName, linkedinUrl }) {
   const raw = JSON.stringify({
+    qid: questionId || "",
     q: question || "",
     n: expertName || "",
     l: linkedinUrl || "",
@@ -89,6 +92,17 @@ function extractLinkedInUrl(expert) {
   }
 
   return null;
+}
+
+function computeExpertKey({ questionId, questionText, expertName, linkedinUrl, index }) {
+  const raw = JSON.stringify({
+    qid: questionId || "",
+    q: questionText || "",
+    n: expertName || "",
+    l: linkedinUrl || "",
+    i: index,
+  });
+  return simpleHash(raw);
 }
 
 function renderOverallFeedback(questionForStorage) {
@@ -204,7 +218,7 @@ function renderOverallFeedback(questionForStorage) {
   overallFeedbackEl.appendChild(card);
 }
 
-function renderExperts(experts, questionForStorage) {
+function renderExperts(experts, { questionId, questionText }) {
   if (!expertsEl) return;
   expertsEl.textContent = "";
 
@@ -232,9 +246,18 @@ function renderExperts(experts, questionForStorage) {
     header.appendChild(name);
 
     const linkedinUrl = extractLinkedInUrl(expert);
+    const expertName = (expert && expert.name) || "Unknown";
+    const expertKey = computeExpertKey({
+      questionId,
+      questionText,
+      expertName,
+      linkedinUrl: linkedinUrl || "",
+      index: idx + 1,
+    });
     const storageKey = feedbackStorageKey({
-      question: questionForStorage || "",
-      expertName: (expert && expert.name) || "",
+      questionId: questionId || "",
+      question: questionText || "",
+      expertName: expertName || "",
       linkedinUrl: linkedinUrl || "",
     });
     const savedFeedback = loadFeedback(storageKey);
@@ -311,6 +334,10 @@ function renderExperts(experts, questionForStorage) {
     saved.textContent = "Saved";
     saved.hidden = true;
 
+    const feedbackError = document.createElement("span");
+    feedbackError.className = "expert-feedback-error";
+    feedbackError.hidden = true;
+
     let savedTimer = null;
     function flashSaved() {
       saved.hidden = false;
@@ -344,13 +371,59 @@ function renderExperts(experts, questionForStorage) {
       updateDirty();
     }
 
-    sendBtn.addEventListener("click", () => {
+    sendBtn.addEventListener("click", async () => {
       if (!isValidScore(draftScore)) return;
-      saveFeedback(storageKey, { score: draftScore, note: draftNote });
-      savedScore = draftScore;
-      savedNote = draftNote;
-      updateDirty();
-      flashSaved();
+      if (!questionId) {
+        feedbackError.textContent = "Missing question id. Please re-run the question.";
+        feedbackError.hidden = false;
+        return;
+      }
+
+      feedbackError.hidden = true;
+      const prevText = sendBtn.textContent;
+      sendBtn.textContent = "Sending...";
+      sendBtn.disabled = true;
+
+      try {
+        const response = await fetch("/api/feedback/expert", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            question_id: questionId,
+            expert_key: expertKey,
+            expert_name: expertName,
+            expert_linkedin_url: linkedinUrl || null,
+            score: draftScore,
+            note: draftNote ? draftNote : null,
+          }),
+        });
+
+        if (response.status === 401) {
+          window.location.href = "/login";
+          return;
+        }
+
+        if (!response.ok) {
+          const payload = await response.json().catch(() => null);
+          feedbackError.textContent =
+            (payload && payload.detail) || "Could not send feedback. Please try again.";
+          feedbackError.hidden = false;
+          return;
+        }
+
+        // Keep a local copy as well (useful for UX / offline-ish behavior).
+        saveFeedback(storageKey, { score: draftScore, note: draftNote });
+        savedScore = draftScore;
+        savedNote = draftNote;
+        updateDirty();
+        flashSaved();
+      } catch (e) {
+        feedbackError.textContent = "Network error. Please try again.";
+        feedbackError.hidden = false;
+      } finally {
+        sendBtn.textContent = prevText;
+        updateDirty();
+      }
     });
 
     const btns = [1, 2, 3].map((score) => {
@@ -390,6 +463,7 @@ function renderExperts(experts, questionForStorage) {
     card.appendChild(reason);
 
     footerLeft.appendChild(noteToggle);
+    footerRight.appendChild(feedbackError);
     footerRight.appendChild(saved);
     footerRight.appendChild(sendBtn);
     footer.appendChild(footerLeft);
@@ -452,7 +526,11 @@ if (askForm && outputEl && errorEl) {
     }
 
     outputEl.textContent = "Suggested experts:";
-    renderExperts(experts, payload && payload.question ? payload.question : question);
+    currentQuestionId = payload && payload.question_id ? payload.question_id : null;
+    renderExperts(experts, {
+      questionId: currentQuestionId,
+      questionText: payload && payload.question ? payload.question : question,
+    });
   });
 }
 

@@ -388,6 +388,11 @@ pre {
   color: #6b7280;
 }
 
+.expert-feedback-error {
+  font-size: 0.8rem;
+  color: var(--warn);
+}
+
 .expert-note-toggle {
   margin-left: 0;
   border: none;

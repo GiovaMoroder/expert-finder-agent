@@ -7,6 +7,7 @@ from typing import Literal
 
 from expert_finder.domain.models import (
     EducationRecord,
+    ExpertFeedbackEntry,
     QuestionLogEntry,
     RankingRule,
     WorkExperienceRecord,
@@ -74,4 +75,14 @@ class QuestionLogRepository(ABC):
         limit: int = 200,
         newest_first: bool = True,
     ) -> list[QuestionLogEntry]:
+        raise NotImplementedError
+
+
+class ExpertFeedbackRepository(ABC):
+    @abstractmethod
+    def append(self, entry: ExpertFeedbackEntry) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def list_by_question_id(self, *, question_id: str, limit: int = 200) -> list[ExpertFeedbackEntry]:
         raise NotImplementedError
