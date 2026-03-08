@@ -9,7 +9,7 @@ from expert_finder.domain.education_normalization import normalize_school
 from expert_finder.domain.models import EducationRecord, RankingRule
 from expert_finder.domain.ports import EducationRepository
 from expert_finder.domain.ports import LLMPort
-from expert_finder.domain.models import QueryExtraction
+from expert_finder.domain.models import QueryExtraction, QueryExtractionList
 
 
 class EducationSearchTool:
@@ -55,7 +55,7 @@ class EducationSearchTool:
         )
 
     # TODO: consider using sorting by date as a default in the tool
-    def build_tool_args(self, question: str, llm: LLMPort) -> QueryExtraction:
+    def build_tool_args(self, question: str, llm: LLMPort) -> QueryExtractionList:
         """Build tool arguments from the question for education search."""
 
         system_prompt_template = (
@@ -80,6 +80,13 @@ class EducationSearchTool:
             - Prioritize the target institution/opportunity context over the asker's background context.
             - Role disambiguation: treat "quant" as a job role (quantitative researcher), not generic
               quantitative skills.
+
+            MULTI-QUERY RULES:
+            - You may return multiple query objects when the request is ambiguous or maps to multiple valid targets.
+            - If a shorthand refers to multiple institutions, create one query per institution.
+              Example: "Oxbridge" -> one query for "Oxford" and one query for "Cambridge".
+            - If a role bucket can map to multiple roles, create one query per role interpretation only when each is plausible.
+            - If the request is unambiguous, return a single query object.
 
             FILTER RULES:
             - Allowed columns are: {available_columns}.
@@ -126,18 +133,20 @@ class EducationSearchTool:
             OUTPUT CONSTRAINTS:
             - Return ONLY valid JSON.
             - Do NOT include explanations, comments, or extra text.
-            - Use exactly the following schema:
+            - Use exactly the following schema as a JSON array of objects:
             
-            {{
-              "tool_required": boolean,
-              "filter_column": string | null,
-              "filter_value": string | null,
-              "sort_by": string | null,
-              "sort_order": "asc" | "desc" | null,
-              "ranking": {{ "<column_name>": {{ "weight": number, "keyword": string }} }} | null
-            }}
+            [
+              {
+                "tool_required": boolean,
+                "filter_column": string | null,
+                "filter_value": string | null,
+                "sort_by": string | null,
+                "sort_order": "asc" | "desc" | null,
+                "ranking": { "<column_name>": { "weight": number, "keyword": string } } | null
+              }
+            ]
 
-            Schema: QueryExtraction
+            Schema: QueryExtraction[]
             """
         )
         system_prompt = system_prompt_template.format(
@@ -145,7 +154,7 @@ class EducationSearchTool:
             default_filter_column=self.DEFAULT_FILTER_COLUMN,
         )
         user_prompt = question
-        extraction = llm.call_json(QueryExtraction, system_prompt, user_prompt)
+        extraction = llm.call_json_list(QueryExtraction, system_prompt, user_prompt)
         return extraction
 
     def get_records(self, names: list[str]) -> dict[str, list[dict]]:

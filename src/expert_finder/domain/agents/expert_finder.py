@@ -11,16 +11,19 @@ from expert_finder.domain.ports import LLMPort
 from expert_finder.domain.tools.education_search import EducationSearchTool
 from expert_finder.domain.tools.profile_compare import ProfileComparisonTool
 from expert_finder.domain.tools.work_experience_search import WorkExperienceSearchTool
-from expert_finder.domain.models import FinalResult, QueryExtraction
+from expert_finder.domain.models import FinalResult, QueryExtractionList
 
 SupportedTool: TypeAlias = EducationSearchTool | WorkExperienceSearchTool
+ToolQueriesBySource: TypeAlias = dict[str, QueryExtractionList]
+SerializedQuery: TypeAlias = dict[str, Any]
+SerializedToolQueries: TypeAlias = dict[str, list[SerializedQuery]]
 
 
 @dataclass(frozen=True, slots=True)
 class ExpertFinderRunOutput:
     result: FinalResult
     metrics: dict[str, int]
-    query_parameters: dict[str, dict[str, Any]]
+    query_parameters: ToolQueriesBySource
     profiles: list[dict[str, Any]]
 
 
@@ -62,9 +65,9 @@ class ExpertFinderAgent:
             len(professional_results)
             # professional_results[:5],
         )
-        query_parameters = {
-            "education_search": edu_tool_args.model_dump(mode="json"),
-            "professional_search": professional_tool_args.model_dump(mode="json"),
+        query_parameters: ToolQueriesBySource = {
+            "education_search": edu_tool_args,
+            "professional_search": professional_tool_args,
         }
 
         candidate_names = list(dict.fromkeys(edu_results + professional_results))
@@ -90,7 +93,7 @@ class ExpertFinderAgent:
             question,
             profiles,
             self.llm,
-            search_context=query_parameters,
+            search_context=self._build_search_context(query_parameters),
         )
         profile_by_name = {profile["name"]: profile for profile in profiles}
         enriched_experts = []
@@ -112,27 +115,47 @@ class ExpertFinderAgent:
             profiles=profiles,
         )
 
-    def use_search_tool(self, tool: SupportedTool, question: str) -> tuple[list[str], QueryExtraction]:
+    def use_search_tool(self, tool: SupportedTool, question: str) -> tuple[list[str], QueryExtractionList]:
         tool_args = tool.build_tool_args(question, self.llm)
         logger = logging.getLogger(self.__class__.__name__)
         logger.debug(
             "Tool %s built args: %s",
             tool.__class__.__name__,
-            tool_args.model_dump(mode="json"),
+            self._serialize_queries(tool_args),
         )
-        if tool_args.tool_required:
-            filter_column = tool_args.filter_column
-            filter_value = tool_args.filter_value
+        results: list[str] = []
+        for query in tool_args:
+            if not query.tool_required:
+                continue
+            filter_column = query.filter_column
+            filter_value = query.filter_value
             if filter_value and not filter_column:
                 if isinstance(tool, EducationSearchTool):
                     filter_column = EducationSearchTool.DEFAULT_FILTER_COLUMN
                 if isinstance(tool, WorkExperienceSearchTool):
                     filter_column = WorkExperienceSearchTool.DEFAULT_FILTER_COLUMN
-            return tool.search(
-                filter_column=filter_column,
-                filter_value=filter_value,
-                sort_by=tool_args.sort_by,
-                sort_order=tool_args.sort_order,
-                ranking=tool_args.ranking,
-            ), tool_args
-        return [], tool_args
+            results.extend(
+                tool.search(
+                    filter_column=filter_column,
+                    filter_value=filter_value,
+                    sort_by=query.sort_by,
+                    sort_order=query.sort_order,
+                    ranking=query.ranking,
+                )
+            )
+        return results, tool_args
+
+    @staticmethod
+    def _serialize_queries(queries: QueryExtractionList) -> list[SerializedQuery]:
+        """Convert a list of query models to JSON-serializable dictionaries."""
+        return [query.model_dump(mode="json") for query in queries]
+
+    def _build_search_context(
+        self,
+        query_parameters: ToolQueriesBySource,
+    ) -> SerializedToolQueries:
+        """Build a JSON-serializable search context from extracted tool queries."""
+        return {
+            tool_name: self._serialize_queries(queries)
+            for tool_name, queries in query_parameters.items()
+        }

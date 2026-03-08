@@ -17,14 +17,16 @@ class _FakeLLM(LLMPort):
 
         if schema_name == "QueryExtraction":
             return json.dumps(
-                {
-                    "tool_required": True,
-                    "filter_column": "company" if "professional experience" in system_prompt.lower() else "institution",
-                    "filter_value": "OpenAI",
-                    "sort_by": "start_date",
-                    "sort_order": "desc",
-                    "ranking": None,
-                }
+                [
+                    {
+                        "tool_required": True,
+                        "filter_column": "company" if "professional experience" in system_prompt.lower() else "institution",
+                        "filter_value": "OpenAI",
+                        "sort_by": "start_date",
+                        "sort_order": "desc",
+                        "ranking": None,
+                    }
+                ]
             )
 
         if schema_name == "FinalResult":
