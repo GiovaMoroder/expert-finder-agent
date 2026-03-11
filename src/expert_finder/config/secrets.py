@@ -6,6 +6,7 @@ from functools import lru_cache
 
 from infisical_sdk import InfisicalSDKClient
 
+from expert_finder.config.settings import get_agent_settings
 from expert_finder.config.settings import get_infisical_settings
 
 @lru_cache(maxsize=1)
@@ -25,4 +26,15 @@ def get_secret(name: str) -> str:
         secret_path="/",
     )
     return value.secretValue
+
+
+def get_secret_from_settings(name: str) -> str:
+    """SecretGetter that sources secrets from runtime settings/env."""
+    if name != "OPENAI_KEY":
+        raise KeyError(f"Unsupported secret name: {name}")
+
+    settings = get_agent_settings()
+    if not settings.openai_key:
+        raise ValueError("OPENAI_KEY is not set")
+    return settings.openai_key
 
