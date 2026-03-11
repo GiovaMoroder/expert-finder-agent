@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from expert_finder.config.settings import AgentSettings
 from expert_finder.config.settings import ApiSettings
+from expert_finder.config.secrets import get_secret_from_settings
 from expert_finder.config.settings import get_api_settings
 from expert_finder.config.settings import get_agent_settings
 from expert_finder.domain.agents.expert_finder import ExpertFinderAgent
@@ -33,7 +34,11 @@ def get_llm(
 ) -> LLMPort:
     """Construct the default LLMPort implementation."""
     settings = settings or get_agent_settings()
-    return GPTLLM(model=settings.gpt_model, temperature=settings.llm_temperature)
+    return GPTLLM(
+        model=settings.gpt_model,
+        temperature=settings.llm_temperature,
+        secret_getter=get_secret_from_settings,
+    )
 
 
 def get_education_repository() -> EducationRepository:
