@@ -8,12 +8,6 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
-class Candidate(BaseModel):
-    name: str
-    current_title: Optional[str] = None
-    institution_records: Optional[list[dict]]
-
-
 class RankingRule(BaseModel):
     weight: float = Field(..., ge=0.0, description="Non-negative weight for this ranking signal")
     keyword: str = Field(..., min_length=1, description="Keyword used to score this column")
