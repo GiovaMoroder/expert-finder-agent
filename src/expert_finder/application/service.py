@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel
-
 from expert_finder.application.deps import get_agent
 from expert_finder.domain.agents.expert_finder import ExpertFinderAgent
 from expert_finder.domain.models.experts import AskQuestionResult
