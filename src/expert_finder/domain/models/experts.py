@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Literal
 from typing import Optional
+from typing import TypeAlias
 
 from pydantic import BaseModel, Field
 
@@ -26,6 +27,9 @@ class QueryExtraction(BaseModel):
         default=None,
         description="Optional weighted ranking rules keyed by column name",
     )
+
+
+QueryExtractionList: TypeAlias = list[QueryExtraction]
 
 
 class FinalExpert(BaseModel):

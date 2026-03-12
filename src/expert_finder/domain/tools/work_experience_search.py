@@ -8,7 +8,7 @@ from typing import Literal
 from expert_finder.domain.models import RankingRule, WorkExperienceRecord
 from expert_finder.domain.ports import WorkExperienceRepository
 from expert_finder.domain.ports import LLMPort
-from expert_finder.domain.models import QueryExtraction
+from expert_finder.domain.models import QueryExtraction, QueryExtractionList
 
 
 class WorkExperienceSearchTool:
@@ -47,7 +47,7 @@ class WorkExperienceSearchTool:
             ranking=ranking,
         )
 
-    def build_tool_args(self, question: str, llm: LLMPort) -> QueryExtraction:
+    def build_tool_args(self, question: str, llm: LLMPort) -> QueryExtractionList:
         """Build tool arguments from the question for professional search."""
 
         system_prompt_template = (
@@ -72,6 +72,14 @@ class WorkExperienceSearchTool:
             - Prioritize the target institution/opportunity context over the asker's background context.
             - Role disambiguation: treat "quant" as a job role (quantitative researcher), not generic
               quantitative skills. Never use "quant" in search or ranking, use "quantitative researcher" instead.
+
+            MULTI-QUERY RULES:
+            - You may return multiple query objects when the request is ambiguous or maps to multiple valid targets.
+            - If a role bucket can map to several plausible roles, create one query per role.
+              Example: "startuppers in Zurich" may map to founders, CTOs, and angel investors.
+            - If a shorthand refers to multiple institutions, create one query per institution.
+              Example: "Oxbridge" -> one query for "Oxford" and one query for "Cambridge".
+            - If the request is unambiguous, return a single query object.
 
             FILTER RULES:
             - Allowed columns are: {available_columns}.
@@ -120,18 +128,20 @@ class WorkExperienceSearchTool:
             OUTPUT CONSTRAINTS:
             - Return ONLY valid JSON.
             - Do NOT include explanations, comments, or extra text.
-            - Use exactly the following schema:
+            - Use exactly the following schema as a JSON array of objects:
 
-            {{
-              "tool_required": boolean,
-              "filter_column": string | null,
-              "filter_value": string | null,
-              "sort_by": string | null,
-              "sort_order": "asc" | "desc" | null,
-              "ranking": {{ "<column_name>": {{ "weight": number, "keyword": string }} }} | null
-            }}
+            [
+              {
+                "tool_required": boolean,
+                "filter_column": string | null,
+                "filter_value": string | null,
+                "sort_by": string | null,
+                "sort_order": "asc" | "desc" | null,
+                "ranking": { "<column_name>": { "weight": number, "keyword": string } } | null
+              }
+            ]
 
-            Schema: QueryExtraction
+            Schema: QueryExtraction[]
             """
         )
         system_prompt = system_prompt_template.format(
@@ -139,7 +149,7 @@ class WorkExperienceSearchTool:
             default_filter_column=self.DEFAULT_FILTER_COLUMN,
         )
         user_prompt = question
-        extraction = llm.call_json(QueryExtraction, system_prompt, user_prompt)
+        extraction = llm.call_json_list(QueryExtraction, system_prompt, user_prompt)
         return extraction
 
     def get_records(self, names: list[str]) -> dict[str, list[dict]]:
